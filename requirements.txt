@@ -1,0 +1,15 @@
+# Core web framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# Production WSGI server
+waitress==2.1.2
+
+# Additional utilities
+gunicorn==21.2.0
+
+# Security and utilities
+python-dotenv==1.0.0
+
+# For health checks and monitoring
+requests==2.31.0
