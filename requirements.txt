@@ -10,6 +10,11 @@ gunicorn==21.2.0
 
 # Security and utilities
 python-dotenv==1.0.0
+flask-talisman==1.1.0
 
 # For health checks and monitoring
 requests==2.31.0
+
+# Enhanced security and encryption
+cryptography==41.0.7
+pyOpenSSL==23.3.0
