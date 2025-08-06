@@ -96,6 +96,29 @@
             font-size: 0.9rem;
         }
 
+        /* LinkedIn Authentication Styles */
+        .btn-linkedin {
+            background: linear-gradient(135deg, #0077b5 0%, #006097 100%);
+            border: none;
+            color: white;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-linkedin:hover {
+            background: linear-gradient(135deg, #006097 0%, #004d7a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 119, 181, 0.3);
+            color: white;
+        }
+
+        .linkedin-auth-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 119, 181, 0.2);
+        }
+
         @media (max-width: 768px) {
             .sidebar-sticky {
                 position: static;
@@ -162,6 +185,11 @@
                                         <strong>IPv6</strong> - Next-gen Networking
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- LinkedIn Authentication -->
+                            <div class="mt-4" id="linkedin-auth-container">
+                                <!-- LinkedIn Auth UI will be injected here -->
                             </div>
                         </div>
                     </div>
@@ -241,6 +269,9 @@
     <!-- 3FA Encryption System -->
     <script src="crypto_3fa.js"></script>
     
+    <!-- LinkedIn Authentication -->
+    <script src="linkedin_auth.js"></script>
+    
     <!-- Custom JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -267,6 +298,20 @@
             
             // Initialize 3FA on page load
             initialize3FA();
+            
+            // Initialize LinkedIn Authentication
+            let linkedInAuthUI;
+            async function initializeLinkedInAuth() {
+                try {
+                    linkedInAuthUI = new LinkedInAuthUI('linkedin-auth-container');
+                    console.log('LinkedIn Auth initialized');
+                } catch (error) {
+                    console.error('Failed to initialize LinkedIn Auth:', error);
+                }
+            }
+            
+            // Initialize LinkedIn Auth on page load
+            initializeLinkedInAuth();
             
             // 3FA Encryption Demo Function
             async function demo3FAEncryption() {

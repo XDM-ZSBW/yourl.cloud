@@ -76,6 +76,41 @@ yourl.cloud implements a **public, authorized solution for encrypting social pro
 2. **Factor 2**: OTP/Hardware Token (something you have)  
 3. **Factor 3**: 256-bit Random Key (something you possess)
 
+## 🔗 LinkedIn Social Authentication
+
+### OAuth 2.0 Integration
+yourl.cloud now supports **LinkedIn social logon** with secure OAuth 2.0 authentication:
+
+- **Secure OAuth 2.0 flow** with state parameter verification
+- **Encrypted token storage** using Web Crypto API
+- **Profile data access** (name, email, professional info)
+- **Automatic token refresh** and session management
+- **3FA integration** for enhanced security
+
+### Setup Instructions
+1. **Create LinkedIn App**:
+   - Visit [LinkedIn Developers](https://www.linkedin.com/developers/)
+   - Create a new app
+   - Get your Client ID and Client Secret
+
+2. **Configure OAuth**:
+   ```javascript
+   // Initialize LinkedIn Auth
+   const linkedInAuth = new LinkedInAuth();
+   linkedInAuth.init('YOUR_LINKEDIN_CLIENT_ID');
+   ```
+
+3. **Add to yourl.cloud**:
+   - LinkedIn authentication is already integrated
+   - Configure your Client ID in `linkedin_auth.js`
+   - Set up redirect URI: `https://yourl.cloud/auth/linkedin/callback`
+
+### Security Features
+- **256-bit AES-GCM encryption** for token storage
+- **State parameter verification** prevents CSRF attacks
+- **Secure session management** with automatic expiration
+- **Zero-knowledge architecture** - sensitive data encrypted locally
+
 ### Key Features
 - **256-bit AES-GCM encryption** for influence scores
 - **PKI-based authorization** for public/private key management
