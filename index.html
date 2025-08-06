@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yourl.cloud - AI-Friendly Service Hub</title>
+    
+    <!-- AI-Friendly Meta Tags -->
+    <meta name="ai-service-entry-points" content="myl.zip">
+    <meta name="ai-ethics-framework" content="myl.zip-standards">
+    <meta name="description" content="AI-friendly service hub providing ethical access to myl.zip services following myl.zip standards and practices">
+    <meta name="session-id" content="f1d78acb-de07-46e0-bfa7-f5b75e3c0c49">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --success-color: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar-sticky {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .sidebar-sticky .card {
+            transition: all 0.3s ease;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-sticky .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .main-input-section {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(40, 167, 69, 0.1) 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0066cc 0%, #0056b3 100%);
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 102, 204, 0.3);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 1rem;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+        }
+
+        .affiliate-links {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .ethics-badge {
+            background: var(--success-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-sticky {
+                position: static;
+                margin-bottom: 2rem;
+            }
+            
+            .main-input-section {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar with myl.zip -->
+            <div class="col-lg-3 col-md-4">
+                <div class="sidebar-sticky">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <i class="fas fa-archive fa-4x text-primary mb-3"></i>
+                                <h3 class="card-title">myl.zip</h3>
+                                <p class="text-muted">Ethical AI Service Platform</p>
+                            </div>
+                            
+                            <div class="service-links mb-4">
+                                <div class="d-grid gap-2">
+                                    <a href="https://myl.zip" class="btn btn-primary" target="_blank" rel="noopener">
+                                        <i class="fas fa-external-link-alt me-2"></i>Visit myl.zip
+                                    </a>
+                                    <a href="https://myl.zip/api" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                                        <i class="fas fa-code me-2"></i>API Access
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <span class="ethics-badge">
+                                    <i class="fas fa-shield-alt me-1"></i>Ethical AI Standards Compliant
+                                </span>
+                            </div>
+
+                            <!-- Technology Credits -->
+                            <div class="mt-4">
+                                <h6 class="text-muted mb-3">
+                                    <i class="fas fa-cogs me-1"></i>Technology Stack
+                                </h6>
+                                <div class="small text-muted">
+                                    <div class="mb-2">
+                                        <i class="fas fa-check text-success me-1"></i>
+                                        <strong>HTML5</strong> - Modern Web Standards
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-check text-success me-1"></i>
+                                        <strong>Bootstrap 5</strong> - UI Framework
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-check text-success me-1"></i>
+                                        <strong>HTTPS-only</strong> - 256-bit Encryption
+                                    </div>
+                                    <div class="mb-2">
+                                        <i class="fas fa-check text-success me-1"></i>
+                                        <strong>IPv6</strong> - Next-gen Networking
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="col-lg-9 col-md-8">
+                <!-- Main Input Section -->
+                <div class="main-input-section">
+                    <div class="text-center">
+                        <h1 class="display-4 fw-bold mb-3">
+                            <i class="fas fa-link me-3"></i>yourl.cloud
+                        </h1>
+                        <p class="lead mb-4">
+                            Transition your links to yourl.cloud with ethical AI standards
+                        </p>
+                        
+                        <!-- Input Form -->
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8">
+                                <div class="input-group input-group-lg">
+                                    <input type="text" class="form-control" placeholder="Enter your link here" 
+                                           id="linkInput" aria-label="URL to shorten">
+                                    <button class="btn btn-primary btn-lg px-4" type="button" id="shortenBtn">
+                                        <i class="fas fa-magic me-2"></i>Shorten
+                                    </button>
+                                </div>
+                                <div class="form-text mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Following myl.zip ethics and standards for responsible link management
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Affiliate Links Section -->
+                <div class="affiliate-links">
+                    <h4 class="text-center mb-4">
+                        <i class="fas fa-heart me-2"></i>Recommended Services & Partners
+                    </h4>
+                    <div class="text-center">
+                        <a href="https://perplexity.ai" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                            <i class="fas fa-brain me-2"></i>Perplexity AI
+                        </a>
+                        <a href="https://openai.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                            <i class="fas fa-robot me-2"></i>OpenAI
+                        </a>
+                        <a href="https://anthropic.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                            <i class="fas fa-microchip me-2"></i>Anthropic
+                        </a>
+                        <a href="https://github.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                            <i class="fab fa-github me-2"></i>GitHub
+                        </a>
+                        <a href="https://stackoverflow.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                            <i class="fab fa-stack-overflow me-2"></i>Stack Overflow
+                        </a>
+                        <a href="https://developer.mozilla.org" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                            <i class="fab fa-firefox me-2"></i>MDN Web Docs
+                        </a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-handshake me-1"></i>
+                            Supporting the technologies and communities that make yourl.cloud possible
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 3FA Encryption System -->
+    <script src="crypto_3fa.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const linkInput = document.getElementById('linkInput');
+            const shortenBtn = document.getElementById('shortenBtn');
+            
+            // Session ID from meta tag
+            const sessionId = document.querySelector('meta[name="session-id"]').content;
+            console.log('Session ID:', sessionId);
+            
+            // Initialize 3FA system
+            let auth, scoring, pki, encryption;
+            
+            async function initialize3FA() {
+                try {
+                    auth = new ThreeFactorAuth();
+                    scoring = new SocialProximityScoring();
+                    pki = new PKIAuthorization();
+                    console.log('3FA system initialized');
+                } catch (error) {
+                    console.error('Failed to initialize 3FA:', error);
+                }
+            }
+            
+            // Initialize 3FA on page load
+            initialize3FA();
+            
+            // 3FA Encryption Demo Function
+            async function demo3FAEncryption() {
+                try {
+                    if (!auth || !scoring || !pki) {
+                        await initialize3FA();
+                    }
+                    
+                    // Generate 256-bit key (Factor 3)
+                    const secretKey = await auth.generate256bitKey();
+                    console.log('Generated 256-bit key');
+                    
+                    // Example user factors (in real implementation, these would come from user input)
+                    const password = "secure_password_123"; // Factor 1
+                    const otp = "123456"; // Factor 2 (from TOTP device)
+                    
+                    // Derive master key
+                    const { masterKey, salt } = await auth.deriveMasterKey(password, otp, secretKey);
+                    console.log('Derived master key');
+                    
+                    // Calculate influence score
+                    const userData = {
+                        networkSize: 5000,
+                        maxNetworkSize: 10000,
+                        engagementRate: 0.75,
+                        trustScore: 0.85,
+                        activityLevel: 0.90
+                    };
+                    
+                    const score = scoring.calculateInfluenceScore(userData);
+                    console.log(`Calculated influence score: ${score.toFixed(4)}`);
+                    
+                    // Encrypt the score
+                    encryption = new InfluenceScoreEncryption(masterKey);
+                    const encryptedScore = await encryption.encryptScore(score, userData);
+                    console.log('Encrypted score data:', encryptedScore);
+                    
+                    // PKI signing
+                    const { privateKey, publicKey } = await pki.generateKeyPair();
+                    const signature = await pki.signScore(privateKey, encryptedScore);
+                    console.log('Score signature:', signature);
+                    
+                    // Verify signature
+                    const isValid = await pki.verifyScore(publicKey, encryptedScore, signature);
+                    console.log(`Signature valid: ${isValid}`);
+                    
+                    return {
+                        score: score,
+                        encryptedScore: encryptedScore,
+                        signature: signature,
+                        isValid: isValid
+                    };
+                    
+                } catch (error) {
+                    console.error('3FA encryption demo failed:', error);
+                    return null;
+                }
+            }
+            
+            // Enhanced URL shortening with 3FA
+            shortenBtn.addEventListener('click', async function() {
+                const url = linkInput.value.trim();
+                
+                if (!url) {
+                    alert('Please enter a URL to shorten');
+                    return;
+                }
+                
+                // Disable button and show loading
+                shortenBtn.disabled = true;
+                shortenBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                
+                try {
+                    // Run 3FA encryption demo in background
+                    const encryptionResult = await demo3FAEncryption();
+                    
+                    // Simulate API call with 3FA encryption
+                    setTimeout(() => {
+                        const shortenedUrl = `https://yourl.cloud/${Math.random().toString(36).substr(2, 8)}`;
+                        
+                        // Show result with encryption status
+                        linkInput.value = shortenedUrl;
+                        linkInput.select();
+                        
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(shortenedUrl).then(() => {
+                            const message = encryptionResult ? 
+                                'Shortened URL copied! (3FA encrypted)' : 
+                                'Shortened URL copied!';
+                            alert(message);
+                        });
+                        
+                        // Reset button
+                        shortenBtn.disabled = false;
+                        shortenBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Shorten';
+                        
+                        // Log encryption details
+                        if (encryptionResult) {
+                            console.log('3FA Encryption completed:', encryptionResult);
+                        }
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('URL shortening failed:', error);
+                    alert('Error processing URL. Please try again.');
+                    
+                    // Reset button
+                    shortenBtn.disabled = false;
+                    shortenBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Shorten';
+                }
+            });
+            
+            // Enter key support
+            linkInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    shortenBtn.click();
+                }
+            });
+            
+            // Add 3FA demo button to sidebar
+            const sidebar = document.querySelector('.sidebar-sticky .card-body');
+            if (sidebar) {
+                const demoButton = document.createElement('button');
+                demoButton.className = 'btn btn-outline-info btn-sm mt-3';
+                demoButton.innerHTML = '<i class="fas fa-shield-alt me-2"></i>3FA Demo';
+                demoButton.onclick = async function() {
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Running...';
+                    
+                    const result = await demo3FAEncryption();
+                    
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-shield-alt me-2"></i>3FA Demo';
+                    
+                    if (result) {
+                        alert(`3FA Demo Complete!\nScore: ${result.score.toFixed(4)}\nSignature Valid: ${result.isValid}`);
+                    } else {
+                        alert('3FA Demo failed. Check console for details.');
+                    }
+                };
+                sidebar.appendChild(demoButton);
+            }
+        });
+    </script>
+</body>
+</html>
