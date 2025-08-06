@@ -1,13 +1,188 @@
 {% extends "base.html" %}
 
-{% block title %}yourl.cloud - Home{% endblock %}
+{% block title %}yourl.cloud - AI-Friendly Service Hub{% endblock %}
+
+{% block head %}
+<!-- AI-Friendly Meta Tags -->
+<meta name="ai-service-entry-points" content="myl.zip">
+<meta name="ai-ethics-framework" content="myl.zip-standards">
+<meta name="description" content="AI-friendly service hub providing ethical access to myl.zip services following myl.zip standards and practices">
+<meta name="session-id" content="f1d78acb-de07-46e0-bfa7-f5b75e3c0c49">
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="text-center">
-            <h1 class="display-4 fw-bold text-primary">myl.zip and perplexity.ai</h1>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar with myl.zip -->
+        <div class="col-lg-3 col-md-4">
+            <div class="sidebar-sticky">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-archive fa-4x text-primary mb-3"></i>
+                            <h3 class="card-title">myl.zip</h3>
+                            <p class="text-muted">Ethical AI Service Platform</p>
+                        </div>
+                        
+                        <div class="service-links mb-4">
+                            <div class="d-grid gap-2">
+                                <a href="https://myl.zip" class="btn btn-primary" target="_blank" rel="noopener">
+                                    <i class="fas fa-external-link-alt me-2"></i>Visit myl.zip
+                                </a>
+                                <a href="https://myl.zip/api" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                                    <i class="fas fa-code me-2"></i>API Access
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <span class="badge bg-success">
+                                <i class="fas fa-shield-alt me-1"></i>Ethical AI Standards Compliant
+                            </span>
+                        </div>
+
+                        <!-- Technology Credits -->
+                        <div class="mt-4">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-cogs me-1"></i>Technology Stack
+                            </h6>
+                            <div class="small text-muted">
+                                <div class="mb-2">
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    <strong>Python</strong> - Flask Framework
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    <strong>Bootstrap 5</strong> - UI Framework
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    <strong>Cloud Run</strong> - Serverless Platform
+                                </div>
+                                <div class="mb-2">
+                                    <i class="fas fa-check text-success me-1"></i>
+                                    <strong>Font Awesome</strong> - Icon Library
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Main Input Section -->
+            <div class="main-input-section bg-light rounded p-5 mb-4">
+                <div class="text-center">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="fas fa-link me-3"></i>yourl.cloud
+                    </h1>
+                    <p class="lead mb-4">
+                        Transition your links to yourl.cloud with ethical AI standards
+                    </p>
+                    
+                    <!-- Input Form -->
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="input-group input-group-lg">
+                                <input type="text" class="form-control" placeholder="Enter your link here" 
+                                       id="linkInput" aria-label="URL to shorten">
+                                <button class="btn btn-primary btn-lg px-4" type="button" id="shortenBtn">
+                                    <i class="fas fa-magic me-2"></i>Shorten
+                                </button>
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Following myl.zip ethics and standards for responsible link management
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Affiliate Links Section -->
+            <div class="affiliate-links bg-white rounded p-4 shadow-sm">
+                <h4 class="text-center mb-4">
+                    <i class="fas fa-heart me-2"></i>Recommended Services & Partners
+                </h4>
+                <div class="text-center">
+                    <a href="https://perplexity.ai" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                        <i class="fas fa-brain me-2"></i>Perplexity AI
+                    </a>
+                    <a href="https://openai.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                        <i class="fas fa-robot me-2"></i>OpenAI
+                    </a>
+                    <a href="https://anthropic.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                        <i class="fas fa-microchip me-2"></i>Anthropic
+                    </a>
+                    <a href="https://github.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                        <i class="fab fa-github me-2"></i>GitHub
+                    </a>
+                    <a href="https://stackoverflow.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                        <i class="fab fa-stack-overflow me-2"></i>Stack Overflow
+                    </a>
+                    <a href="https://developer.mozilla.org" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
+                        <i class="fab fa-firefox me-2"></i>MDN Web Docs
+                    </a>
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-handshake me-1"></i>
+                        Supporting the technologies and communities that make yourl.cloud possible
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const linkInput = document.getElementById('linkInput');
+    const shortenBtn = document.getElementById('shortenBtn');
+    
+    // Session ID from meta tag
+    const sessionId = document.querySelector('meta[name="session-id"]').content;
+    console.log('Session ID:', sessionId);
+    
+    shortenBtn.addEventListener('click', function() {
+        const url = linkInput.value.trim();
+        
+        if (!url) {
+            alert('Please enter a URL to shorten');
+            return;
+        }
+        
+        // Disable button and show loading
+        shortenBtn.disabled = true;
+        shortenBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        
+        // Simulate API call (replace with actual implementation)
+        setTimeout(() => {
+            const shortenedUrl = `https://yourl.cloud/${Math.random().toString(36).substr(2, 8)}`;
+            
+            // Show result
+            linkInput.value = shortenedUrl;
+            linkInput.select();
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(shortenedUrl).then(() => {
+                alert('Shortened URL copied to clipboard!');
+            });
+            
+            // Reset button
+            shortenBtn.disabled = false;
+            shortenBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Shorten';
+        }, 1500);
+    });
+    
+    // Enter key support
+    linkInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            shortenBtn.click();
+        }
+    });
+});
+</script>
 {% endblock %}
