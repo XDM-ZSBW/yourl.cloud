@@ -27,6 +27,8 @@ import sys
 import webbrowser
 import threading
 import time
+import hashlib
+import random
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -74,6 +76,65 @@ CLOUD_RUN_CONFIG = {
     "readiness_check_path": "/health"  # Readiness check endpoint
 }
 
+def generate_marketing_password():
+    """
+    Generate a fun, marketing-friendly password that changes with each commit.
+    Uses git commit hash to ensure consistency within a commit but changes between commits.
+    """
+    try:
+        # Get the current git commit hash
+        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                            text=True, stderr=subprocess.DEVNULL).strip()[:8]
+    except:
+        # Fallback if git is not available
+        commit_hash = hashlib.md5(str(datetime.utcnow()).encode()).hexdigest()[:8]
+    
+    # Fun marketing words and phrases
+    marketing_words = [
+        "CLOUD", "FUTURE", "INNOVATE", "DREAM", "BUILD", "CREATE", "LAUNCH", "FLY",
+        "SPARK", "SHINE", "GLOW", "RISE", "LEAP", "JUMP", "DASH", "ZOOM",
+        "POWER", "MAGIC", "WONDER", "AMAZE", "THRILL", "EXCITE", "INSPIRE", "IGNITE",
+        "ROCKET", "STAR", "MOON", "SUN", "OCEAN", "MOUNTAIN", "FOREST", "RIVER",
+        "TECH", "AI", "CODE", "DATA", "SMART", "FAST", "SECURE", "TRUST",
+        "FRIEND", "FAMILY", "TEAM", "SQUAD", "CREW", "GANG", "TRIBE", "CLAN"
+    ]
+    
+    # Fun emojis and symbols
+    emojis = ["🚀", "⭐", "🌟", "💫", "✨", "🔥", "⚡", "💎", "🎯", "🎪", "🎨", "🎭"]
+    
+    # Generate a deterministic but fun password using the commit hash
+    # Convert commit hash to a number for seeding
+    hash_num = int(commit_hash, 16)
+    random.seed(hash_num)
+    
+    # Pick a random marketing word
+    word = random.choice(marketing_words)
+    
+    # Pick a random emoji
+    emoji = random.choice(emojis)
+    
+    # Generate a short number (2-3 digits)
+    number = random.randint(10, 999)
+    
+    # Combine them in a fun way
+    password = f"{word}{number}{emoji}"
+    
+    return password
+
+def get_current_marketing_password():
+    """
+    Get the current marketing password, generating it if needed.
+    """
+    # Check if we have a cached password for this commit
+    try:
+        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                            text=True, stderr=subprocess.DEVNULL).strip()[:8]
+    except:
+        commit_hash = "unknown"
+    
+    # Generate the password based on current commit
+    return generate_marketing_password()
+
 # Friends and Family Guard Ruleset
 FRIENDS_FAMILY_GUARD = {
     "enabled": True,
@@ -89,7 +150,7 @@ FRIENDS_FAMILY_GUARD = {
 
 # Demo configuration for rapid prototyping (replace with proper auth/db for production)
 DEMO_CONFIG = {
-    "password": "yourl2024",  # Hardcoded demo password
+    "password": get_current_marketing_password(),  # Dynamic marketing password that changes with commits
     "connections": [
         {
             "id": 1,
@@ -199,8 +260,11 @@ def main_endpoint():
     Compatible with Cloud Run domain mappings.
     """
     if request.method == 'GET':
+        # Get current marketing password
+        current_password = get_current_marketing_password()
+        
         # Return the landing page
-        return render_template('index.html') if os.path.exists('templates/index.html') else """
+        return render_template('index.html') if os.path.exists('templates/index.html') else f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -208,15 +272,16 @@ def main_endpoint():
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-                .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                h1 { color: #333; text-align: center; }
-                .form-group { margin: 20px 0; }
-                label { display: block; margin-bottom: 5px; font-weight: bold; }
-                input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
-                button { background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-                button:hover { background: #0056b3; }
-                .info { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+                body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                h1 {{ color: #333; text-align: center; }}
+                .form-group {{ margin: 20px 0; }}
+                label {{ display: block; margin-bottom: 5px; font-weight: bold; }}
+                input[type="password"] {{ width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }}
+                button {{ background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }}
+                button:hover {{ background: #0056b3; }}
+                .info {{ background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                .password-display {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; font-weight: bold; }}
             </style>
         </head>
         <body>
@@ -225,62 +290,67 @@ def main_endpoint():
                 <div class="info">
                     <strong>URL API Server with Visual Inspection</strong><br>
                     Production-ready Flask application with security features.<br>
-                    <strong>Domain:</strong> {domain}<br>
-                    <strong>Protocol:</strong> {protocol}
+                    <strong>Domain:</strong> {get_original_host()}<br>
+                    <strong>Protocol:</strong> {get_original_protocol()}
                 </div>
                 <form method="POST">
                     <div class="form-group">
-                        <label for="password">Demo Password:</label>
-                        <input type="password" id="password" name="password" placeholder="Enter demo password" required>
+                        <label for="password">🎯 Marketing Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter the fun marketing password" required>
                     </div>
-                    <button type="submit">Access API</button>
+                    <button type="submit">🚀 Launch Experience</button>
                 </form>
+                <div class="password-display">
+                    <strong>🎪 Current Marketing Password:</strong> {current_password}
+                </div>
                 <div class="info">
-                    <strong>Demo Password:</strong> yourl2024<br>
                     <strong>Health Check:</strong> <a href="/health">/health</a><br>
                     <strong>Status:</strong> <a href="/status">/status</a>
                 </div>
             </div>
         </body>
         </html>
-        """.format(
-            domain=get_original_host(),
-            protocol=get_original_protocol()
-        )
+        """
     
     elif request.method == 'POST':
         # Handle authentication
         password = request.form.get('password', '')
+        current_password = get_current_marketing_password()
         
-        if password == DEMO_CONFIG["password"]:
+        if password == current_password:
             return jsonify({
                 "status": "authenticated",
-                "message": "Welcome to Yourl.Cloud API",
+                "message": "🎉 Welcome to Yourl.Cloud API! Marketing password accepted!",
                 "connections": DEMO_CONFIG["connections"],
                 "timestamp": datetime.utcnow().isoformat(),
                 "organization": FRIENDS_FAMILY_GUARD["organization"],
                 "domain": get_original_host(),
-                "protocol": get_original_protocol()
+                "protocol": get_original_protocol(),
+                "marketing_password": current_password
             })
         else:
-            return """
+            return f"""
             <!DOCTYPE html>
             <html>
             <head>
                 <title>Access Denied - Yourl.Cloud</title>
                 <meta charset="utf-8">
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; text-align: center; }
-                    .container { max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                    h1 { color: #d32f2f; }
-                    .btn { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; text-align: center; }}
+                    .container {{ max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #d32f2f; }}
+                    .btn {{ background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }}
+                    .password-hint {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; margin: 10px 0; }}
                 </style>
             </head>
             <body>
                 <div class="container">
                     <h1>❌ Access Denied</h1>
-                    <p>Invalid password. Please try again.</p>
-                    <a href="/" class="btn">Go Back</a>
+                    <p>Invalid marketing password. Please try again.</p>
+                    <div class="password-hint">
+                        <strong>💡 Hint:</strong> The current marketing password is: {current_password}
+                    </div>
+                    <a href="/" class="btn">🔄 Try Again</a>
                 </div>
             </body>
             </html>
@@ -690,6 +760,9 @@ if __name__ == '__main__':
     else:
         display_host = HOST
     
+    # Get current marketing password
+    current_password = get_current_marketing_password()
+    
     print(f"🚀 Starting URL API Server with Visual Inspection")
     print(f"📍 Host: {display_host}")
     print(f"🐛 Debug: {DEBUG}")
@@ -700,7 +773,7 @@ if __name__ == '__main__':
     print(f"👁️ Visual Inspection: PC/Phone/Tablet allowed, Watch blocked")
     print(f"☁️ Google Cloud Run Support: Enabled")
     print(f"🌐 Domain Mapping: {'Enabled' if CLOUD_RUN_CONFIG['domain_mapping_enabled'] else 'Disabled'}")
-    print(f"🔐 Demo Mode: Enabled")
+    print(f"🎪 Marketing Password: {current_password}")
     print("=" * 60)
     
     # Launch browser for local development (not for production/Cloud Run)
