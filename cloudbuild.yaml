@@ -10,6 +10,30 @@ options:
     - 'DEPLOY_REGION=us-west1'
 
 steps:
+  # Generate marketing codes for this deployment
+  - name: 'python:3.9'
+    id: 'generate-codes'
+    entrypoint: python
+    args:
+      - 'scripts/marketing_code.py'
+      - '--project'
+      - '$PROJECT_ID'
+      - '--action'
+      - 'create-deployment'
+      - '--context'
+      - |
+        {
+          "commit_sha": "$COMMIT_SHA",
+          "build_id": "$BUILD_ID",
+          "environment": "production",
+          "features": ["marketing-code-display"],
+          "donor_funded_features": [],
+          "trigger_type": "$_TRIGGER_TYPE",
+          "branch": "$BRANCH_NAME"
+        }
+    env:
+      - 'PYTHONPATH=/workspace'
+
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build'
@@ -44,33 +68,56 @@ steps:
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
 
-  # Send email notification
+  # Generate audit report
+  - name: 'python:3.9'
+    id: 'audit-report'
+    entrypoint: python
+    args:
+      - 'scripts/marketing_code.py'
+      - '--project'
+      - '$PROJECT_ID'
+      - '--action'
+      - 'audit'
+    env:
+      - 'PYTHONPATH=/workspace'
+
+  # Send deployment notification
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'notify'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        # Get current marketing codes
+        CODES=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current)
+        CURRENT_CODE=$(echo "$CODES" | grep "Current public code" | cut -d: -f2 | tr -d ' ')
+        NEXT_CODE=$(echo "$CODES" | grep "Next public code" | cut -d: -f2 | tr -d ' ')
+        
         echo "Sending notification to $NOTIFICATION_EMAIL"
         gcloud functions call sendBuildNotification \
           --region us-west1 \
           --data '{
             "to": "'$$NOTIFICATION_EMAIL'",
             "message": {
-              "subject": "Cloud Build Status: yourl.cloud '$$COMMIT_SHA'",
+              "subject": "Yourl.Cloud Deployment Status: '$$COMMIT_SHA'",
               "body": {
-                "text": "Build Status: Success\nCommit: '$$COMMIT_SHA'\nBuild ID: '$$BUILD_ID'\nRepository: '$$REPO_NAME'\nBranch: '$$BRANCH_NAME'\n\nView build details: https://console.cloud.google.com/cloud-build/builds;region=global/'$$BUILD_ID'?project='$$PROJECT_ID'"
+                "text": "Deployment Status: Success\nCommit: '$$COMMIT_SHA'\nBuild ID: '$$BUILD_ID'\nCurrent Marketing Code: '$CURRENT_CODE'\nNext Marketing Code: '$NEXT_CODE'\n\nView build details: https://console.cloud.google.com/cloud-build/builds;region=global/'$$BUILD_ID'?project='$$PROJECT_ID'"
               }
             }
           }'
 
-  # Update GitHub status
+  # Update GitHub status with marketing codes
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'github-status'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        # Get current marketing codes
+        CODES=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current)
+        CURRENT_CODE=$(echo "$CODES" | grep "Current public code" | cut -d: -f2 | tr -d ' ')
+        NEXT_CODE=$(echo "$CODES" | grep "Next public code" | cut -d: -f2 | tr -d ' ')
+        
         curl -X POST \
           -H "Authorization: token $$GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
@@ -78,8 +125,8 @@ steps:
           -d '{
             "state": "success",
             "target_url": "https://console.cloud.google.com/cloud-build/builds;region=global/$$BUILD_ID?project=$$PROJECT_ID",
-            "description": "Cloud Build completed successfully",
-            "context": "cloud-build/status"
+            "description": "Deployment successful - Marketing Code: '$NEXT_CODE'",
+            "context": "yourl-cloud/deployment"
           }'
 
 images:
