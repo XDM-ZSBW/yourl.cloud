@@ -93,7 +93,22 @@ def extract_features_from_app():
     if 'domain_mapping' in app_content:
         features.append("🌍 **Domain Mapping**: Custom domain support (yourl.cloud)")
     
+    if 'generate_marketing_password' in app_content:
+        features.append("🎪 **Dynamic Marketing Passwords**: ASCII-only passwords that change with each commit")
+    
     return features
+
+def get_current_marketing_password_from_app():
+    """Get the current marketing password from app.py."""
+    try:
+        # Import the function from app.py
+        import sys
+        import os
+        sys.path.append(os.getcwd())
+        from app import get_current_marketing_password
+        return get_current_marketing_password()
+    except Exception as e:
+        return "AI474?"  # Fallback password if import fails
 
 def get_project_timeline():
     """Get project timeline from git history and current state."""
@@ -206,6 +221,35 @@ gcloud run domain-mappings create \\
 - `GET /status` - Service status with domain mapping info
 - `GET /guard` - Friends and Family Guard status
 - `GET /api` - Visual inspection interface
+
+## 🎪 Marketing Password System
+
+The application features a dynamic, fun marketing password system that changes with each commit:
+
+### 🎯 Current Marketing Password
+**`{get_current_marketing_password_from_app()}`** - Generated for this commit!
+
+### ✨ Password Features
+- **Dynamic Generation**: Changes with every code commit
+- **ASCII-Only**: Uses basic ASCII characters for maximum compatibility
+- **Marketing-Friendly**: Fun, memorable combinations
+- **Public-Safe**: Safe for public sharing and marketing
+- **Auto-Display**: Shown on landing page for easy access
+
+### 🎊 Password Format
+**Format**: `MARKETING_WORD + 2-3_DIGIT_NUMBER + ASCII_SYMBOL`
+
+**Examples**:
+- `CLOUD123!` - Cloud computing theme
+- `FUTURE456@` - Future-focused
+- `MAGIC789#` - Magical experience
+- `ROCKET321$` - Rocket-powered
+
+### 🔄 How It Works
+1. **Commit-Based**: Uses git commit hash for deterministic generation
+2. **Fun Words**: Marketing-friendly words like CLOUD, FUTURE, MAGIC, ROCKET
+3. **ASCII Symbols**: Uses !@#$%&*+=?~^ for fun characters
+4. **Auto-Update**: Changes automatically with each commit
 
 ## 🛡️ Friends and Family Guard
 

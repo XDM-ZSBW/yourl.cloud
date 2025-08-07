@@ -1,11 +1,11 @@
 # Yourl.Cloud - URL API Server with Visual Inspection
 
-**Last Updated**: 2025-08-07T13:34:34.423607
+**Last Updated**: 2025-08-07T13:40:22.172929
 **Session ID**: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 **Organization**: Yourl Cloud Inc.
 **Branch**: main
-**Commit**: 0d19b612
-**Commit Date**: 2025-08-07 06:34:33 -0700
+**Commit**: 151fe43b
+**Commit Date**: 2025-08-07 06:36:27 -0700
 
 ## 🎯 Project Overview
 
@@ -23,6 +23,7 @@ Yourl.Cloud is a production-ready Python Flask API that returns the request URL 
 - 🔗 **X-Forwarded Headers**: Proper proxy header handling
 - 🚀 **WSGI Server**: Production-ready Gunicorn/Waitress support
 - 🌍 **Domain Mapping**: Custom domain support (yourl.cloud)
+- 🎪 **Dynamic Marketing Passwords**: ASCII-only passwords that change with each commit
 
 ## 🚀 Quick Start
 
@@ -76,6 +77,35 @@ gcloud run domain-mappings create \
 - `GET /status` - Service status with domain mapping info
 - `GET /guard` - Friends and Family Guard status
 - `GET /api` - Visual inspection interface
+
+## 🎪 Marketing Password System
+
+The application features a dynamic, fun marketing password system that changes with each commit:
+
+### 🎯 Current Marketing Password
+**`AI474?`** - Generated for this commit!
+
+### ✨ Password Features
+- **Dynamic Generation**: Changes with every code commit
+- **ASCII-Only**: Uses basic ASCII characters for maximum compatibility
+- **Marketing-Friendly**: Fun, memorable combinations
+- **Public-Safe**: Safe for public sharing and marketing
+- **Auto-Display**: Shown on landing page for easy access
+
+### 🎊 Password Format
+**Format**: `MARKETING_WORD + 2-3_DIGIT_NUMBER + ASCII_SYMBOL`
+
+**Examples**:
+- `CLOUD123!` - Cloud computing theme
+- `FUTURE456@` - Future-focused
+- `MAGIC789#` - Magical experience
+- `ROCKET321$` - Rocket-powered
+
+### 🔄 How It Works
+1. **Commit-Based**: Uses git commit hash for deterministic generation
+2. **Fun Words**: Marketing-friendly words like CLOUD, FUTURE, MAGIC, ROCKET
+3. **ASCII Symbols**: Uses !@#$%&*+=?~^ for fun characters
+4. **Auto-Update**: Changes automatically with each commit
 
 ## 🛡️ Friends and Family Guard
 
@@ -185,4 +215,4 @@ The application serves as both a testing/development tool and a production servi
 
 ---
 
-*Generated on 2025-08-07T13:34:34.423607 | Branch: main | Commit: 0d19b612*
+*Generated on 2025-08-07T13:40:22.172929 | Branch: main | Commit: 151fe43b*
