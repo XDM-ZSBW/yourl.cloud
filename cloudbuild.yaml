@@ -1,10 +1,14 @@
 # Service account to use for builds
 serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/automation-sa-yourl@$PROJECT_ID.iam.gserviceaccount.com'
+
+# Build options
 options:
   logging: CLOUD_LOGGING_ONLY
   env:
     - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
-    
+    - 'NOTIFICATION_EMAIL=bcherrman@gmail.com'
+    - 'DEPLOY_REGION=us-west1'
+
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
@@ -29,38 +33,39 @@ steps:
       - '--service-account'
       - 'automation-sa-yourl@$PROJECT_ID.iam.gserviceaccount.com'
       - '--region'
-      - 'us-west1'  # Changed to match reference
+      - 'us-west1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
+      - '--min-instances'
+      - '1'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
 
   # Send email notification
-  - name: 'gcr.io/cloud-builders/curl'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'notify'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        cat > email.json << EOF
-        {
-          "to": "bcherrman@gmail.com",
-          "message": {
-            "subject": "Cloud Build Status: yourl.cloud $$COMMIT_SHA",
-            "body": {
-              "text": "Build Status: Success\nCommit: $$COMMIT_SHA\nBuild ID: $$BUILD_ID\nRepository: $$REPO_NAME\nBranch: $$BRANCH_NAME\n\nView build details: https://console.cloud.google.com/cloud-build/builds;region=global/$$BUILD_ID?project=$$PROJECT_ID"
+        echo "Sending notification to $NOTIFICATION_EMAIL"
+        gcloud functions call sendBuildNotification \
+          --region us-west1 \
+          --data '{
+            "to": "'$$NOTIFICATION_EMAIL'",
+            "message": {
+              "subject": "Cloud Build Status: yourl.cloud '$$COMMIT_SHA'",
+              "body": {
+                "text": "Build Status: Success\nCommit: '$$COMMIT_SHA'\nBuild ID: '$$BUILD_ID'\nRepository: '$$REPO_NAME'\nBranch: '$$BRANCH_NAME'\n\nView build details: https://console.cloud.google.com/cloud-build/builds;region=global/'$$BUILD_ID'?project='$$PROJECT_ID'"
+              }
             }
-          }
-        }
-        EOF
-        curl -X POST -H "Authorization: Bearer $$(gcloud auth print-identity-token)" \
-             -H "Content-Type: application/json" \
-             https://us-central1-$$PROJECT_ID.cloudfunctions.net/sendBuildNotification \
-             -d @email.json
+          }'
 
   # Update GitHub status
-  - name: 'gcr.io/cloud-builders/curl'
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'github-status'
     entrypoint: 'bash'
     args:
@@ -82,14 +87,6 @@ images:
 
 # Timeout for the entire build process
 timeout: '1800s'
-
-# Build options
-options:
-  logging: CLOUD_LOGGING_ONLY
-  env:
-    - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
-    - 'NOTIFICATION_EMAIL=bcherrman@gmail.com'
-    - 'DEPLOY_REGION=us-west1'
 
 # Tags for build identification
 tags:
