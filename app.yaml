@@ -1,0 +1,62 @@
+# yourl.cloud - Google App Engine Configuration
+# ============================================
+# 
+# Yourl-Cloud Inc. - AI-Friendly Service Hub
+# Session ID: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
+
+runtime: nodejs18
+service: yourl-cloud
+
+env_variables:
+  NODE_ENV: "production"
+  SESSION_ID: "f1d78acb-de07-46e0-bfa7-f5b75e3c0c49"
+  ORGANIZATION: "Yourl-Cloud Inc."
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+  target_throughput_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+handlers:
+  # Serve static files
+  - url: /(.*\.(gif|png|jpg|css|js|ico|woff|woff2|ttf|eot|svg))
+    static_files: \1
+    upload: .*\.(gif|png|jpg|css|js|ico|woff|woff2|ttf|eot|svg)
+    secure: always
+
+  # Serve HTML files
+  - url: /(.*\.html)
+    static_files: \1
+    upload: .*\.html
+    secure: always
+
+  # Health check endpoint
+  - url: /health
+    script: auto
+    secure: always
+
+  # Status endpoint
+  - url: /status
+    script: auto
+    secure: always
+
+  # Default handler - serve index.html
+  - url: /.*
+    static_files: index.html
+    upload: index.html
+    secure: always
+
+inbound_services:
+  - warmup
+
+beta_settings:
+  cloud_sql_instances: ""
+
+vpc_access_connector:
+  name: "projects/${PROJECT_ID}/locations/${REGION}/connectors/yourl-cloud-connector"

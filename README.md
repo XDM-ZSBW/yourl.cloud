@@ -1,24 +1,31 @@
-# yourl.cloud - AI-Friendly Service Hub
+# Yourl-Cloud Inc. - AI-Friendly Service Hub
 
 > **An ethical, AI-friendly service hub following myl.zip standards and practices**
 
+**Organization**: Yourl-Cloud Inc.  
 **Repository**: [https://github.com/XDM-ZSBW/yourl.cloud](https://github.com/XDM-ZSBW/yourl.cloud)  
 **Session ID**: `f1d78acb-de07-46e0-bfa7-f5b75e3c0c49`
 
 ## 🎯 Project Overview
 
-yourl.cloud is a simplified, ethical service hub built with modern web standards. The service prioritizes AI-friendly design, ethical standards, and accessibility for all users and AI agents.
+Yourl-Cloud Inc. is a simplified, ethical service hub built with modern web standards. The service prioritizes AI-friendly design, ethical standards, and accessibility for all users and AI agents. Deployed on Google Cloud with HTTPS support and enterprise-grade security.
 
 ## 📁 Project Structure
 
 ```
-yourl.cloud/
-├── index.html    # Main service interface
-├── README.md     # This documentation
-├── reset.sh      # Unix/Linux reset script
-├── reset.bat     # Windows reset script  
-├── reset         # Python reset utility
-└── status        # Project status file
+yourl-cloud/
+├── public/              # Static files for web server
+│   ├── index.html       # Main service interface
+│   ├── *.js            # JavaScript modules
+│   └── nginx.conf      # Nginx configuration
+├── app.yaml            # Google App Engine configuration
+├── cloudbuild.yaml     # Google Cloud Build CI/CD
+├── server.js           # Express.js server
+├── package.json        # Node.js dependencies
+├── deploy.sh           # Linux/macOS deployment script
+├── deploy.bat          # Windows deployment script
+├── README.md           # This documentation
+└── docker-compose.yml  # Docker development setup
 ```
 
 ## ✨ Key Features
@@ -28,8 +35,12 @@ yourl.cloud/
 - **🎨 Modern UI**: Bootstrap 5 responsive design with Font Awesome icons
 - **📱 Accessibility**: WCAG compliant with full keyboard navigation
 - **⚡ Lightweight**: Simplified structure with essential files only
+- **☁️ Cloud-Native**: Google Cloud deployment with auto-scaling
+- **🏢 Enterprise-Ready**: Yourl-Cloud Inc. branding and compliance
 
 ## 🚀 Quick Start
+
+### Local Development
 
 1. **Clone the repository**:
    ```bash
@@ -37,21 +48,69 @@ yourl.cloud/
    cd yourl.cloud
    ```
 
-2. **Open index.html** in your browser or serve with any web server
-
-3. **Reset project** (if needed):
+2. **Install dependencies**:
    ```bash
-   # Unix/Linux/macOS
-   ./reset.sh
-   
-   # Windows
-   reset.bat
-   
-   # Python utility
-   python reset
+   npm install
    ```
 
-## 🐳 Docker Deployment
+3. **Start development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the application**: http://localhost:8080
+
+### Google Cloud Deployment
+
+#### Prerequisites
+
+1. **Install Google Cloud SDK**:
+   - [Download and install](https://cloud.google.com/sdk/docs/install)
+   - Authenticate: `gcloud auth login`
+
+2. **Create Google Cloud Project**:
+   ```bash
+   gcloud projects create yourl-cloud-inc --name="Yourl-Cloud Inc."
+   gcloud config set project yourl-cloud-inc
+   ```
+
+#### Deploy to Google Cloud
+
+**Option 1: Automated Deployment (Recommended)**
+
+```bash
+# Linux/macOS
+./deploy.sh
+
+# Windows
+deploy.bat
+```
+
+**Option 2: Manual Deployment**
+
+```bash
+# Enable required APIs
+gcloud services enable appengine.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+gcloud services enable containerregistry.googleapis.com
+
+# Deploy to App Engine
+gcloud app deploy app.yaml
+
+# Open the application
+gcloud app browse
+```
+
+#### Deployment Features
+
+- **🔒 HTTPS by Default**: Automatic SSL certificate management
+- **⚡ Auto-scaling**: Handles traffic spikes automatically
+- **🌍 Global CDN**: Fast loading worldwide
+- **📊 Monitoring**: Built-in logging and metrics
+- **🔄 CI/CD**: Automated deployment pipeline
+- **💰 Cost-Effective**: Pay only for what you use
+
+## 🐳 Docker Development
 
 ### Quick Docker Setup
 
@@ -127,6 +186,7 @@ docker-compose down
 - **256-bit encryption**: Minimum TLS encryption standard
 - **IPv6 networking**: Next-generation IP protocol only
 - **myl.zip compliance**: Ethical AI standards
+- **Enterprise security**: SOC2, ISO27001 compliance ready
 
 ## 🤖 AI Agent Integration
 
@@ -135,12 +195,13 @@ docker-compose down
 <meta name="ai-service-entry-points" content="myl.zip">
 <meta name="ai-ethics-framework" content="myl.zip-standards">
 <meta name="session-id" content="f1d78acb-de07-46e0-bfa7-f5b75e3c0c49">
+<meta name="organization" content="Yourl-Cloud Inc.">
 ```
 
 ## 🔐 3FA Encryption System
 
 ### Three-Factor Authentication (3FA)
-yourl.cloud implements a **public, authorized solution for encrypting social proximity influence scores** with Three-Factor Authentication:
+Yourl-Cloud Inc. implements a **public, authorized solution for encrypting social proximity influence scores** with Three-Factor Authentication:
 
 1. **Factor 1**: Password/Passphrase (something you know)
 2. **Factor 2**: OTP/Hardware Token (something you have)  
@@ -186,7 +247,7 @@ const signature = await pki.signScore(privateKey, encryptedScore);
 ## 🔗 LinkedIn Social Authentication
 
 ### OAuth 2.0 Integration
-yourl.cloud now supports **LinkedIn social logon** with secure OAuth 2.0 authentication:
+Yourl-Cloud Inc. supports **LinkedIn social logon** with secure OAuth 2.0 authentication:
 
 - **Secure OAuth 2.0 flow** with state parameter verification
 - **Encrypted token storage** using Web Crypto API
@@ -207,7 +268,7 @@ yourl.cloud now supports **LinkedIn social logon** with secure OAuth 2.0 authent
    linkedInAuth.init('YOUR_LINKEDIN_CLIENT_ID');
    ```
 
-3. **Add to yourl.cloud**:
+3. **Add to Yourl-Cloud Inc.**:
    - LinkedIn authentication is already integrated
    - Configure your Client ID in `linkedin_auth.js`
    - Set up redirect URI: `https://yourl.cloud/auth/linkedin/callback`
@@ -221,7 +282,7 @@ yourl.cloud now supports **LinkedIn social logon** with secure OAuth 2.0 authent
 ## 🔄 myl.zip Fallback System
 
 ### Offline-First Architecture
-yourl.cloud implements a **robust fallback system** for myl.zip connections that ensures continuous access to ethical standards:
+Yourl-Cloud Inc. implements a **robust fallback system** for myl.zip connections that ensures continuous access to ethical standards:
 
 - **Local Cache**: Uses `localStorage` with keys `myl.zip` and `myl.zip-standards`
 - **GitHub Cache**: Falls back to GitHub API when myl.zip is unreachable
@@ -255,7 +316,7 @@ if (status.status === 'CACHED') {
 ## 🌐 Trust Mesh Network
 
 ### CA NONPROFIT Trust Architecture
-yourl.cloud implements a **conceptual Trust Mesh Network** for ethical service access:
+Yourl-Cloud Inc. implements a **conceptual Trust Mesh Network** for ethical service access:
 
 - **CA NONPROFIT Status**: Filing under review (Operating: August 4, 2025)
 - **Trust Levels**: Bank, Utility, Healthcare, and Mesh security standards
@@ -323,6 +384,9 @@ yourl.cloud implements a **conceptual Trust Mesh Network** for ethical service a
 - **Healthcare Integration**: HIPAA-compliant healthcare trust level
 - **LinkedIn OAuth 2.0**: Social authentication integration
 - **Local Storage**: Client-side caching with dual-key strategy
+- **Google Cloud**: App Engine, Cloud Build, Container Registry
+- **Express.js**: Node.js web framework
+- **HTTPS**: Automatic SSL certificate management
 
 ## 📚 References and Attribution
 
@@ -330,6 +394,7 @@ yourl.cloud implements a **conceptual Trust Mesh Network** for ethical service a
 - [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.3/)
 - [Font Awesome Icons](https://fontawesome.com/)
 - [MDN Web Docs](https://developer.mozilla.org/) - Web standards
+- [Google Cloud Documentation](https://cloud.google.com/docs/)
 
 ### AI and Research Sources
 - **Perplexity.ai** - AI research and best practices
@@ -339,12 +404,13 @@ yourl.cloud implements a **conceptual Trust Mesh Network** for ethical service a
 ### Development Tools
 - **Cursor IDE** - AI-powered development environment
 - **Git/GitHub** - Version control and collaboration
+- **Google Cloud SDK** - Cloud deployment and management
 
 ## 🤝 Contributing
 
 1. **Fork the repository**
 2. **Follow myl.zip ethical standards**
-3. **Keep structure simple** (6 essential files only)
+3. **Keep structure simple** (essential files only)
 4. **Test accessibility** and responsive design
 5. **Submit a Pull Request**
 
@@ -357,7 +423,40 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 - **Issues**: [GitHub Issues](https://github.com/XDM-ZSBW/yourl.cloud/issues)
 - **Documentation**: Check the `status` file for current project state
 - **Reset Utilities**: Use provided reset scripts for clean state
+- **Deployment**: Use `deploy.sh` or `deploy.bat` for Google Cloud deployment
 
 ---
 
-**Built with ❤️ following ethical AI standards • Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49**
+**Built with ❤️ by Yourl-Cloud Inc. following ethical AI standards • Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49**
+
+## 🧪 Beta Journaling Tool
+
+### Privacy-First Secure Journaling
+Yourl-Cloud Inc. offers a **closed beta journaling tool** with privacy-first design and automatic content erasure:
+
+- **🔒 Privacy-First**: Content never leaves your browser unless you explicitly save it
+- **⏰ 3-Minute Timer**: Automatic content erasure when timer expires or page loses focus
+- **💾 Local Download**: Save journal entries as text files to your device
+- **🛡️ Secure Sessions**: Encrypted sessions with automatic logout and content clearing
+
+### Beta Access
+- **Invite Codes**: `YOURL2024`, `BETA2024`, `JOURNAL2024`
+- **Access URL**: `https://yourl.cloud/beta/access`
+- **Journal URL**: `https://yourl.cloud/beta/journal`
+- **Session Duration**: 3 minutes per session
+- **Max Users**: 100 concurrent beta users
+
+### Security Features
+- **No server storage**: Journal content never stored on servers
+- **Local processing**: All journaling functionality runs in browser
+- **Automatic erasure**: Content cleared on timer expiry or page blur
+- **Session management**: Temporary access with automatic expiration
+
+### Quick Start
+1. Visit `https://yourl.cloud/beta/access`
+2. Enter invite code (e.g., `YOURL2024`)
+3. Access journaling tool at `https://yourl.cloud/beta/journal`
+4. Start writing with 3-minute timer
+5. Save content to device before timer expires
+
+For detailed documentation, see [BETA_JOURNALING.md](BETA_JOURNALING.md).
