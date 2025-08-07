@@ -314,22 +314,68 @@ def main_endpoint():
         """
     
     elif request.method == 'POST':
-        # Handle authentication
-        password = request.form.get('password', '')
-        current_password = get_current_marketing_password()
+        # Handle authentication using code validator
+        from scripts.code_validator import CodeValidator
         
-        if password == current_password:
-            return jsonify({
-                "status": "authenticated",
-                "message": "🎉 Welcome to Yourl.Cloud API! Marketing password accepted!",
-                "connections": DEMO_CONFIG["connections"],
-                "timestamp": datetime.utcnow().isoformat(),
-                "organization": FRIENDS_FAMILY_GUARD["organization"],
-                "domain": get_original_host(),
-                "protocol": get_original_protocol(),
-                "marketing_password": current_password
-            })
+        # Get the input code
+        code = request.form.get('password', '')
+        if not code:
+            return jsonify({"status": "error", "message": "No code provided"})
+        
+        # Validate the code
+        validator = CodeValidator(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
+        is_valid, response = validator.validate_code(
+            code,
+            is_dev=os.environ.get('FLASK_ENV') == 'development'
+        )
+        
+        if is_valid:
+            # Return success page with code history
+            return f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Access Granted - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                    .container {{ max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #28a745; text-align: center; }}
+                    .code-info {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 5px; margin: 20px 0; }}
+                    .code-history {{ margin-top: 30px; }}
+                    .code-item {{ background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 10px 0; }}
+                    .code-item h3 {{ margin: 0 0 10px 0; color: #007bff; }}
+                    .timestamp {{ color: #6c757d; font-size: 0.9em; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>✅ Access Granted</h1>
+                    
+                    <div class="code-info">
+                        <h2>🎯 Current Code Information</h2>
+                        <p><strong>Code:</strong> {response['code_info']['code']}</p>
+                        <p><strong>Type:</strong> {response['code_info']['type']}</p>
+                        <p><strong>Created:</strong> {response['code_info']['created_at']}</p>
+                    </div>
+                    
+                    <div class="code-history">
+                        <h2>📜 Code History</h2>
+                        {''.join([f'''
+                            <div class="code-item">
+                                <h3>{code['code']}</h3>
+                                <p><strong>Type:</strong> {code['type']}</p>
+                                <p class="timestamp">{code['created_at']}</p>
+                            </div>
+                        ''' for code in response['visible_codes']])}
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
         else:
+            # Return error page
+            current_password = get_current_marketing_password()
             return f"""
             <!DOCTYPE html>
             <html>
@@ -347,7 +393,7 @@ def main_endpoint():
             <body>
                 <div class="container">
                     <h1>❌ Access Denied</h1>
-                    <p>Invalid marketing password. Please try again.</p>
+                    <p>{response['error']}</p>
                     <div class="password-hint">
                         <strong>💡 Hint:</strong> The current marketing password is: {current_password}
                     </div>
