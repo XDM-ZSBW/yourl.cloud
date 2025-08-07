@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yourl.Cloud - AI-Friendly Service Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-section {
+            margin-bottom: 2rem;
+        }
+        
+        .input-section h2 {
+            margin-bottom: 1rem;
+            color: #ffd700;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .submit-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .affiliate-links {
+            margin-top: 2rem;
+        }
+        
+        .affiliate-links h2 {
+            margin-bottom: 1rem;
+            color: #ffd700;
+        }
+        
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .affiliate-link {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .affiliate-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .affiliate-link h3 {
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Yourl.Cloud</h1>
+            <p>AI-Friendly Service Hub - Secure and Fast</p>
+        </div>
+        
+        <div class="main-panel">
+            <div class="input-section">
+                <h2>🔐 Access Control</h2>
+                <form method="POST" action="/">
+                    <div class="input-group">
+                        <input type="password" name="password" placeholder="Enter access password" required>
+                        <button type="submit" class="submit-btn">Submit</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="affiliate-links">
+                <h2>🌟 Featured Services</h2>
+                <div class="links-grid">
+                    <a href="https://github.com/XDM-ZSBW/yourl.cloud" class="affiliate-link" target="_blank">
+                        <h3>GitHub Repository</h3>
+                        <p>Source code and documentation</p>
+                    </a>
+                    <a href="https://cloud.google.com/run" class="affiliate-link" target="_blank">
+                        <h3>Google Cloud Run</h3>
+                        <p>Deploy and scale applications</p>
+                    </a>
+                    <a href="https://flask.palletsprojects.com/" class="affiliate-link" target="_blank">
+                        <h3>Flask Framework</h3>
+                        <p>Python web framework</p>
+                    </a>
+                    <a href="https://perplexity.ai" class="affiliate-link" target="_blank">
+                        <h3>Perplexity AI</h3>
+                        <p>AI-powered search and assistance</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

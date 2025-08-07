@@ -1,6 +1,6 @@
 @echo off
 REM Restart script for URL API Server
-REM Author: Yourl-Cloud Inc.
+REM Author: Yourl Cloud Inc.
 REM Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 
 echo 🚀 Restarting URL API Server...

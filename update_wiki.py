@@ -6,7 +6,7 @@ Wiki Update Script
 Simple script to update the GitHub wiki with current project information.
 Ensures wiki stays synchronized with main repository.
 
-Author: Yourl-Cloud Inc.
+Author: Yourl Cloud Inc.
 Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 """
 
@@ -42,7 +42,7 @@ def create_wiki_content():
 
 **Last Updated**: {timestamp}
 **Session ID**: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
-**Organization**: Yourl-Cloud Inc.
+**Organization**: Yourl Cloud Inc.
 
 ## Project Overview
 
