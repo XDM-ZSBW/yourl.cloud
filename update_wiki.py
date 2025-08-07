@@ -18,23 +18,26 @@ import sys
 import json
 import subprocess
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 def get_git_info():
     """Get current git information."""
     try:
-        # Get current branch
-        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
-                                       text=True, stderr=subprocess.DEVNULL).strip()
+        # Get current branch with proper encoding
+        result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
+                              capture_output=True, text=True, encoding='utf-8', errors='ignore')
+        branch = result.stdout.strip() if result.returncode == 0 else 'unknown'
         
-        # Get last commit hash
-        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
-                                            text=True, stderr=subprocess.DEVNULL).strip()[:8]
+        # Get last commit hash with proper encoding
+        result = subprocess.run(['git', 'rev-parse', 'HEAD'], 
+                              capture_output=True, text=True, encoding='utf-8', errors='ignore')
+        commit_hash = result.stdout.strip()[:8] if result.returncode == 0 else 'unknown'
         
-        # Get last commit date
-        commit_date = subprocess.check_output(['git', 'log', '-1', '--format=%cd', '--date=iso'], 
-                                            text=True, stderr=subprocess.DEVNULL).strip()
+        # Get last commit date with proper encoding
+        result = subprocess.run(['git', 'log', '-1', '--format=%cd', '--date=iso'], 
+                              capture_output=True, text=True, encoding='utf-8', errors='ignore')
+        commit_date = result.stdout.strip() if result.returncode == 0 else datetime.now(timezone.utc).isoformat()
         
         return {
             'branch': branch,
@@ -46,7 +49,7 @@ def get_git_info():
         return {
             'branch': 'unknown',
             'commit_hash': 'unknown',
-            'commit_date': datetime.utcnow().isoformat()
+            'commit_date': datetime.now(timezone.utc).isoformat()
         }
 
 def read_file_content(file_path):
@@ -115,23 +118,26 @@ def get_project_timeline():
     timeline = []
     
     try:
-        # Get recent commits
-        commits = subprocess.check_output(['git', 'log', '--oneline', '--since=30 days'], 
-                                        text=True, stderr=subprocess.DEVNULL).strip().split('\n')
+        # Get recent commits with proper encoding handling
+        result = subprocess.run(['git', 'log', '--oneline', '--since=30 days'], 
+                              capture_output=True, text=True, encoding='utf-8', errors='ignore')
         
-        for commit in commits[:10]:  # Last 10 commits
-            if commit:
-                parts = commit.split(' ', 1)
-                if len(parts) == 2:
-                    hash_part = parts[0]
-                    message = parts[1]
-                    timeline.append(f"**{hash_part}**: {message}")
+        if result.returncode == 0 and result.stdout:
+            commits = result.stdout.strip().split('\n')
+            
+            for commit in commits[:10]:  # Last 10 commits
+                if commit:
+                    parts = commit.split(' ', 1)
+                    if len(parts) == 2:
+                        hash_part = parts[0]
+                        message = parts[1]
+                        timeline.append(f"**{hash_part}**: {message}")
     
     except Exception as e:
         print(f"Warning: Could not get git timeline: {e}")
     
     # Add current state
-    timeline.append(f"**{datetime.utcnow().strftime('%Y-%m-%d')}**: Current - Cloud Run Domain Mapping Implementation")
+    timeline.append(f"**{datetime.now(timezone.utc).strftime('%Y-%m-%d')}**: Current - Cloud Run Domain Mapping Implementation")
     
     return timeline
 
@@ -140,7 +146,7 @@ def create_wiki_content():
     
     # Get current information
     git_info = get_git_info()
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now(timezone.utc).isoformat()
     features = extract_features_from_app()
     timeline = get_project_timeline()
     
