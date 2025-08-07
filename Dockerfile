@@ -4,21 +4,6 @@
 # Multi-stage build for optimal performance and security
 # Session ID: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 # 
-# Build stage for optimization (optional)
-FROM node:18-alpine AS builder
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files (if they exist)
-COPY package*.json ./
-
-# Install dependencies (if any)
-RUN npm ci --only=production || true
-
-# Copy source files
-COPY . .
-
 # Production stage with nginx
 FROM nginx:alpine
 
@@ -34,8 +19,23 @@ RUN addgroup -g 1001 -S nginx-user && \
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy application files
-COPY --from=builder /app /usr/share/nginx/html/
+# Copy all application files
+COPY . /usr/share/nginx/html/
+
+# Remove unnecessary files from the web root
+RUN rm -f /usr/share/nginx/html/Dockerfile \
+    && rm -f /usr/share/nginx/html/docker-compose.yml \
+    && rm -f /usr/share/nginx/html/docker-build.sh \
+    && rm -f /usr/share/nginx/html/docker-build.bat \
+    && rm -f /usr/share/nginx/html/.dockerignore \
+    && rm -f /usr/share/nginx/html/.gcloudignore \
+    && rm -f /usr/share/nginx/html/README.md \
+    && rm -f /usr/share/nginx/html/LICENSE \
+    && rm -f /usr/share/nginx/html/reset* \
+    && rm -f /usr/share/nginx/html/Status \
+    && rm -f /usr/share/nginx/html/crypto_3fa.py \
+    && rm -rf /usr/share/nginx/html/.git \
+    && rm -rf /usr/share/nginx/html/.github
 
 # Set proper permissions
 RUN chown -R nginx-user:nginx-user /usr/share/nginx/html && \
