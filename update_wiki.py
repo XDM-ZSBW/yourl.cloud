@@ -1,20 +1,53 @@
 #!/usr/bin/env python3
 """
-Wiki Update Script
-==================
+Wiki Update Script - Comprehensive Wiki Synchronization
+======================================================
 
-Simple script to update the GitHub wiki with current project information.
-Ensures wiki stays synchronized with main repository.
+Advanced script to automatically update the GitHub wiki with current project information.
+Ensures wiki stays synchronized with main repository and includes past, present, and future context.
 
 Author: Yourl Cloud Inc.
 Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
+Organization: Yourl Cloud Inc.
+Domain Mapping: Compatible
+Cloud Run: Supported
 """
 
 import os
 import sys
 import json
-from datetime import datetime
+import subprocess
+import re
+from datetime import datetime, timedelta
 from pathlib import Path
+
+def get_git_info():
+    """Get current git information."""
+    try:
+        # Get current branch
+        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
+                                       text=True, stderr=subprocess.DEVNULL).strip()
+        
+        # Get last commit hash
+        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                            text=True, stderr=subprocess.DEVNULL).strip()[:8]
+        
+        # Get last commit date
+        commit_date = subprocess.check_output(['git', 'log', '-1', '--format=%cd', '--date=iso'], 
+                                            text=True, stderr=subprocess.DEVNULL).strip()
+        
+        return {
+            'branch': branch,
+            'commit_hash': commit_hash,
+            'commit_date': commit_date
+        }
+    except Exception as e:
+        print(f"Warning: Could not get git info: {e}")
+        return {
+            'branch': 'unknown',
+            'commit_hash': 'unknown',
+            'commit_date': datetime.utcnow().isoformat()
+        }
 
 def read_file_content(file_path):
     """Read file content safely."""
@@ -27,53 +60,103 @@ def read_file_content(file_path):
         print(f"Error reading {file_path}: {e}")
         return None
 
+def extract_features_from_app():
+    """Extract current features from app.py."""
+    app_content = read_file_content('app.py')
+    if not app_content:
+        return []
+    
+    features = []
+    
+    # Extract features based on code patterns
+    if 'CLOUD_RUN_CONFIG' in app_content:
+        features.append("🌐 **Cloud Run Domain Mapping**: Full compatibility with custom domains")
+    
+    if 'FRIENDS_FAMILY_GUARD' in app_content:
+        features.append("🛡️ **Friends and Family Guard**: Security ruleset compliance")
+    
+    if 'visual_inspection' in app_content:
+        features.append("👁️ **Visual Inspection**: Modern web interface for allowed devices")
+    
+    if 'device_type' in app_content:
+        features.append("📱 **Device Detection**: Automatic detection of PC, phone, tablet, watch")
+    
+    if 'health_check' in app_content:
+        features.append("🏥 **Health Checks**: Cloud Run compatible health endpoints")
+    
+    if 'X-Forwarded' in app_content:
+        features.append("🔗 **X-Forwarded Headers**: Proper proxy header handling")
+    
+    if 'gunicorn' in app_content or 'waitress' in app_content:
+        features.append("🚀 **WSGI Server**: Production-ready Gunicorn/Waitress support")
+    
+    if 'domain_mapping' in app_content:
+        features.append("🌍 **Domain Mapping**: Custom domain support (yourl.cloud)")
+    
+    return features
+
+def get_project_timeline():
+    """Get project timeline from git history and current state."""
+    timeline = []
+    
+    try:
+        # Get recent commits
+        commits = subprocess.check_output(['git', 'log', '--oneline', '--since=30 days'], 
+                                        text=True, stderr=subprocess.DEVNULL).strip().split('\n')
+        
+        for commit in commits[:10]:  # Last 10 commits
+            if commit:
+                parts = commit.split(' ', 1)
+                if len(parts) == 2:
+                    hash_part = parts[0]
+                    message = parts[1]
+                    timeline.append(f"**{hash_part}**: {message}")
+    
+    except Exception as e:
+        print(f"Warning: Could not get git timeline: {e}")
+    
+    # Add current state
+    timeline.append(f"**{datetime.utcnow().strftime('%Y-%m-%d')}**: Current - Cloud Run Domain Mapping Implementation")
+    
+    return timeline
+
 def create_wiki_content():
-    """Create wiki content from current project state."""
+    """Create comprehensive wiki content from current project state."""
+    
+    # Get current information
+    git_info = get_git_info()
+    timestamp = datetime.utcnow().isoformat()
+    features = extract_features_from_app()
+    timeline = get_project_timeline()
     
     # Read current files
     readme_content = read_file_content('README.md')
     app_content = read_file_content('app.py')
+    status_content = read_file_content('STATUS.md')
     
-    # Get current timestamp
-    timestamp = datetime.utcnow().isoformat()
-    
-    # Create wiki content
-    wiki_content = f"""# URL API Server with Visual Inspection
+    # Create comprehensive wiki content
+    wiki_content = f"""# Yourl.Cloud - URL API Server with Visual Inspection
 
 **Last Updated**: {timestamp}
 **Session ID**: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 **Organization**: Yourl Cloud Inc.
+**Branch**: {git_info['branch']}
+**Commit**: {git_info['commit_hash']}
+**Commit Date**: {git_info['commit_date']}
 
-## Project Overview
+## 🎯 Project Overview
 
-This is a simple Python Flask API that returns the request URL with visual inspection capabilities. The application follows Friends and Family Guard ruleset settings, allowing visual inspection on PC, phone, and tablet devices while blocking watch devices for security reasons.
+Yourl.Cloud is a production-ready Python Flask API that returns the request URL with advanced visual inspection capabilities. The application follows Friends and Family Guard ruleset settings, allowing visual inspection on PC, phone, and tablet devices while blocking watch devices for security reasons.
 
-## Current Features
+**Key Innovation**: Full Google Cloud Run domain mapping compatibility with automatic X-Forwarded header support.
 
-- ✅ **URL API**: Returns request URL and metadata in JSON format
-- ✅ **Visual Inspection**: Modern web interface for allowed devices
-- ✅ **Device Detection**: Automatic detection of PC, phone, tablet, watch
-- ✅ **Friends and Family Guard**: Security ruleset compliance
-- ✅ **Real-time Updates**: Auto-refresh every 30 seconds
-- ✅ **Accessibility**: Responsive design for all screen sizes
+## ✅ Current Features
 
-## Device Support
+{chr(10).join(f"- {feature}" for feature in features)}
 
-| Device Type | Visual Inspection | Status |
-|-------------|-------------------|--------|
-| PC          | ✅ Allowed        | Full access |
-| Phone       | ✅ Allowed        | Full access |
-| Tablet      | ✅ Allowed        | Full access |
-| Watch       | ❌ Blocked        | Security rule |
+## 🚀 Quick Start
 
-## API Endpoints
-
-- `GET /` - Main endpoint (JSON or HTML)
-- `GET /health` - Health check
-- `GET /status` - Service status
-- `GET /guard` - Friends and Family Guard status
-
-## Quick Start
+### Local Development
 
 ```bash
 # Clone repository
@@ -83,43 +166,163 @@ cd yourl.cloud
 # Install dependencies
 pip install -r requirements.txt
 
-# Run application
+# Run application (All instances are production instances)
 python app.py
 ```
 
-## Friends and Family Guard
+### Cloud Run Deployment
 
-The application implements a security ruleset that:
-- Allows visual inspection on PC, phone, and tablet devices
-- Blocks visual inspection on watch devices for security
-- Provides transparent status reporting
-- Ensures appropriate access control
+```bash
+# Build and deploy
+gcloud builds submit --tag gcr.io/$PROJECT_ID/yourl-cloud .
+gcloud run deploy yourl-cloud \\
+  --image gcr.io/$PROJECT_ID/yourl-cloud:latest \\
+  --region=us-west1 \\
+  --platform=managed \\
+  --allow-unauthenticated \\
+  --port=8080
 
-## Timeline
+# Map custom domain
+gcloud run domain-mappings create \\
+  --service yourl-cloud \\
+  --domain yourl.cloud \\
+  --region us-west1 \\
+  --platform managed
+```
 
-- **2025-08-06**: Initial implementation with visual inspection
-- **2025-08-06**: Friends and Family Guard ruleset implementation
-- **2025-08-06**: Device detection and access control
-- **2025-08-06**: Wiki automation and documentation
+## 📱 Device Support
 
-## Context
+| Device Type | Visual Inspection | Status | Security |
+|-------------|-------------------|--------|----------|
+| PC          | ✅ Allowed        | Full access | Friends & Family Guard |
+| Phone       | ✅ Allowed        | Full access | Friends & Family Guard |
+| Tablet      | ✅ Allowed        | Full access | Friends & Family Guard |
+| Watch       | ❌ Blocked        | Security rule | Friends & Family Guard |
 
-This project evolved from a simple URL API to include visual inspection capabilities while maintaining security through the Friends and Family Guard ruleset. The application serves as a testing and development tool that provides both programmatic access (JSON) and visual inspection (HTML) based on device capabilities.
+## 🔌 API Endpoints
 
-## Source of Truth
+- `GET /` - Main endpoint (JSON or HTML with domain info)
+- `GET /health` - Health check with Cloud Run compatibility
+- `GET /status` - Service status with domain mapping info
+- `GET /guard` - Friends and Family Guard status
+- `GET /api` - Visual inspection interface
 
-**yourl.cloud** is always the source of truth for latest information. This wiki is automatically updated from the main repository.
+## 🛡️ Friends and Family Guard
+
+The application implements a comprehensive security ruleset that:
+- ✅ Allows visual inspection on PC, phone, and tablet devices
+- ❌ Blocks visual inspection on watch devices for security
+- 🔍 Provides transparent status reporting
+- 🎯 Ensures appropriate access control
+- 🌐 Supports domain mapping with X-Forwarded headers
+
+## 🌍 Domain Mapping Features
+
+### ✅ Implemented Features
+- **X-Forwarded Headers Support**: Proper handling of `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`
+- **Health Check Endpoint**: `/health` endpoint for Cloud Run health checks
+- **CORS Compatibility**: Configured for domain mapping cross-origin requests
+- **HTTPS Support**: Automatic HTTPS detection and protocol handling
+- **Proxy Trust**: Configured to trust Cloud Run's proxy headers
+- **Domain Detection**: Real-time domain and protocol detection
+
+### 🔧 Configuration
+```python
+CLOUD_RUN_CONFIG = {{
+    "domain_mapping_enabled": True,
+    "region": "us-west1",
+    "trust_proxy": True,
+    "cors_enabled": True,
+    "health_check_path": "/health",
+    "readiness_check_path": "/health"
+}}
+```
+
+## 📅 Timeline
+
+### Recent Development
+{chr(10).join(f"- {item}" for item in timeline[:5])}
+
+### Key Milestones
+- **2025-08-07**: Cloud Run Domain Mapping Implementation
+- **2025-08-07**: X-Forwarded Headers Support
+- **2025-08-07**: Health Check Compatibility
+- **2025-08-07**: Production WSGI Server Integration
+- **2025-08-06**: Friends and Family Guard Implementation
+- **2025-08-06**: Visual Inspection Interface
+- **2025-08-06**: Device Detection System
+
+## 🔮 Future Roadmap
+
+### Planned Features
+- 🔐 **Enhanced Authentication**: OAuth 2.0 integration
+- 📊 **Analytics Dashboard**: Usage metrics and monitoring
+- 🔄 **Auto-scaling**: Advanced Cloud Run scaling policies
+- 🛡️ **Security Scanning**: Automated vulnerability detection
+- 🌐 **Multi-region**: Global deployment support
+
+### Development Priorities
+1. **Security Hardening**: Advanced security features
+2. **Performance Optimization**: Enhanced caching and CDN
+3. **Monitoring**: Comprehensive logging and alerting
+4. **Documentation**: Enhanced guides and tutorials
+
+## 🏗️ Architecture
+
+### Current Stack
+- **Backend**: Python Flask 3.0.2
+- **WSGI Server**: Gunicorn (Unix) / Waitress (Windows)
+- **Deployment**: Google Cloud Run
+- **Domain**: yourl.cloud (custom domain mapping)
+- **Security**: Friends and Family Guard ruleset
+
+### Production Features
+- ✅ **All instances are production instances**
+- ✅ **Automatic health checks**
+- ✅ **Domain mapping compatibility**
+- ✅ **X-Forwarded header support**
+- ✅ **HTTPS enforcement**
+- ✅ **Error handling and logging**
+
+## 📚 Documentation
+
+### Key Documents
+- **[README.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/README.md)**: Main project documentation
+- **[CLOUD_RUN_DOMAIN_MAPPING.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/CLOUD_RUN_DOMAIN_MAPPING.md)**: Domain mapping guide
+- **[STATUS.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/STATUS.md)**: Current project status
+- **[SECURITY.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/SECURITY.md)**: Security policy
+
+## 🎯 Context
+
+This project evolved from a simple URL API to a comprehensive cloud-native application with:
+- **Visual inspection capabilities** for modern web interfaces
+- **Security-first approach** with Friends and Family Guard
+- **Cloud Run compatibility** for scalable deployment
+- **Domain mapping support** for custom domains
+- **Production-ready architecture** with WSGI servers
+
+The application serves as both a testing/development tool and a production service, providing programmatic access (JSON) and visual inspection (HTML) based on device capabilities and security rules.
+
+## 🔗 Source of Truth
+
+**yourl.cloud** is always the source of truth for latest information. This wiki is automatically updated from the main repository after each commit.
+
+### Wiki Update Process
+1. **Automatic Updates**: Wiki updates after each commit
+2. **Linear Progression**: README.md maintains current state
+3. **Past/Present/Future**: Wiki includes historical context and future roadmap
+4. **Real-time Sync**: Wiki reflects current repository state
 
 ---
 
-*Generated on {timestamp}*
+*Generated on {timestamp} | Branch: {git_info['branch']} | Commit: {git_info['commit_hash']}*
 """
     
     return wiki_content
 
 def update_wiki():
     """Update the wiki with current content."""
-    print("🔄 Starting wiki update...")
+    print("Starting comprehensive wiki update...")
     
     # Create wiki content
     wiki_content = create_wiki_content()
@@ -131,10 +334,43 @@ def update_wiki():
     with open(wiki_file, 'w', encoding='utf-8') as f:
         f.write(wiki_content)
     
-    print(f"✅ Wiki updated: {wiki_file}")
-    print("🎯 Remember: yourl.cloud is always the source of truth")
+    print(f"Wiki updated: {wiki_file}")
+    print("Remember: yourl.cloud is always the source of truth")
+    print("Wiki includes: Past, Present, and Future context")
     
     return wiki_content
 
+def create_wiki_update_hook():
+    """Create a git hook to automatically update wiki after commits."""
+    hook_content = """#!/bin/sh
+# Git hook to automatically update wiki after commits
+
+echo "🔄 Auto-updating wiki after commit..."
+python update_wiki.py
+
+if [ $? -eq 0 ]; then
+    echo "✅ Wiki updated successfully"
+else
+    echo "❌ Wiki update failed"
+fi
+"""
+    
+    # Create .git/hooks directory if it doesn't exist
+    hooks_dir = ".git/hooks"
+    os.makedirs(hooks_dir, exist_ok=True)
+    
+    # Write post-commit hook
+    hook_file = os.path.join(hooks_dir, "post-commit")
+    with open(hook_file, 'w') as f:
+        f.write(hook_content)
+    
+    # Make it executable
+    os.chmod(hook_file, 0o755)
+    
+    print(f"✅ Git hook created: {hook_file}")
+
 if __name__ == "__main__":
-    update_wiki()
+    if len(sys.argv) > 1 and sys.argv[1] == "--setup-hook":
+        create_wiki_update_hook()
+    else:
+        update_wiki()

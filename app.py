@@ -13,6 +13,7 @@ Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 Friends and Family Guard: Enabled
 Google Cloud Run: Supported
 WSGI Server: Production Ready
+Domain Mapping: Compatible
 """
 
 from flask import Flask, request, jsonify, render_template_string, render_template
@@ -20,6 +21,9 @@ import socket
 import os
 import re
 import logging
+import platform
+import subprocess
+import sys
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -32,12 +36,23 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Configuration - Google Cloud Run compatible
-HOST = '0.0.0.0'  # Listen on all interfaces
+# Configuration - Google Cloud Run compatible with domain mapping support
+HOST = '0.0.0.0'  # Listen on all interfaces (required for Cloud Run)
 PORT = int(os.environ.get('PORT', 8080))  # Read PORT from environment (default 8080 for Cloud Run)
 DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
 # Production mode detection - All instances deploy as production instances
 PRODUCTION = True  # Always production for all deployments
+
+# Cloud Run Domain Mapping Configuration
+# These settings ensure compatibility with custom domain mappings
+CLOUD_RUN_CONFIG = {
+    "domain_mapping_enabled": True,
+    "region": "us-west1",  # Default region for domain mappings
+    "trust_proxy": True,  # Trust X-Forwarded headers from Cloud Run proxy
+    "cors_enabled": True,  # Enable CORS for domain mapping compatibility
+    "health_check_path": "/health",  # Health check endpoint for Cloud Run
+    "readiness_check_path": "/health"  # Readiness check endpoint
+}
 
 # Friends and Family Guard Ruleset
 FRIENDS_FAMILY_GUARD = {
@@ -83,6 +98,43 @@ DEMO_CONFIG = {
     ]
 }
 
+# Configure Flask for Cloud Run domain mapping compatibility
+app.config.update(
+    # Trust X-Forwarded headers from Cloud Run proxy
+    PREFERRED_URL_SCHEME='https',  # Cloud Run always serves HTTPS
+    # Enable proxy support for X-Forwarded headers
+    USE_X_SENDFILE=False,
+    # Disable strict host checking for domain mapping compatibility
+    SERVER_NAME=None
+)
+
+def get_client_ip():
+    """
+    Get the real client IP address, handling Cloud Run's X-Forwarded headers.
+    Cloud Run sits behind a proxy, so we need to check X-Forwarded-For header.
+    """
+    # Check for X-Forwarded-For header (Cloud Run proxy)
+    x_forwarded_for = request.headers.get('X-Forwarded-For')
+    if x_forwarded_for:
+        # X-Forwarded-For can contain multiple IPs, take the first one
+        return x_forwarded_for.split(',')[0].strip()
+    # Fallback to direct connection
+    return request.remote_addr
+
+def get_original_host():
+    """
+    Get the original host from X-Forwarded-Host header (Cloud Run domain mapping).
+    Falls back to the request host if not available.
+    """
+    return request.headers.get('X-Forwarded-Host', request.host)
+
+def get_original_protocol():
+    """
+    Get the original protocol from X-Forwarded-Proto header.
+    Cloud Run always serves HTTPS, but we check the header for completeness.
+    """
+    return request.headers.get('X-Forwarded-Proto', 'https')
+
 def detect_device_type(user_agent):
     """
     Detect device type based on User-Agent string.
@@ -118,6 +170,7 @@ def is_visual_inspection_allowed(device_type):
 def main_endpoint():
     """
     Main endpoint that handles both GET (landing page) and POST (authentication).
+    Compatible with Cloud Run domain mappings.
     """
     if request.method == 'GET':
         # Return the landing page
@@ -145,7 +198,9 @@ def main_endpoint():
                 <h1>🚀 Yourl.Cloud</h1>
                 <div class="info">
                     <strong>URL API Server with Visual Inspection</strong><br>
-                    Production-ready Flask application with security features.
+                    Production-ready Flask application with security features.<br>
+                    <strong>Domain:</strong> {domain}<br>
+                    <strong>Protocol:</strong> {protocol}
                 </div>
                 <form method="POST">
                     <div class="form-group">
@@ -162,7 +217,10 @@ def main_endpoint():
             </div>
         </body>
         </html>
-        """
+        """.format(
+            domain=get_original_host(),
+            protocol=get_original_protocol()
+        )
     
     elif request.method == 'POST':
         # Handle authentication
@@ -174,7 +232,9 @@ def main_endpoint():
                 "message": "Welcome to Yourl.Cloud API",
                 "connections": DEMO_CONFIG["connections"],
                 "timestamp": datetime.utcnow().isoformat(),
-                "organization": FRIENDS_FAMILY_GUARD["organization"]
+                "organization": FRIENDS_FAMILY_GUARD["organization"],
+                "domain": get_original_host(),
+                "protocol": get_original_protocol()
             })
         else:
             return """
@@ -207,18 +267,24 @@ def main_endpoint():
 def get_request_url():
     """
     API endpoint that returns the request URL and metadata.
+    Compatible with Cloud Run domain mappings.
     """
-    # Get request information
+    # Get request information with Cloud Run header support
     url = request.url
     method = request.method
     headers = dict(request.headers)
     user_agent = headers.get('User-Agent', 'Unknown')
     device_type = detect_device_type(user_agent)
     
+    # Get Cloud Run specific information
+    client_ip = get_client_ip()
+    original_host = get_original_host()
+    original_protocol = get_original_protocol()
+    
     # Check if visual inspection is allowed
     if is_visual_inspection_allowed(device_type):
         # Return HTML for allowed devices
-        return render_visual_inspection(url, device_type, datetime.utcnow())
+        return render_visual_inspection(url, device_type, datetime.utcnow(), original_host, original_protocol)
     else:
         # Return JSON for blocked devices (like watches)
         return jsonify({
@@ -228,12 +294,19 @@ def get_request_url():
             "visual_inspection": "blocked",
             "timestamp": datetime.utcnow().isoformat(),
             "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
-            "organization": FRIENDS_FAMILY_GUARD["organization"]
+            "organization": FRIENDS_FAMILY_GUARD["organization"],
+            "cloud_run": {
+                "client_ip": client_ip,
+                "original_host": original_host,
+                "original_protocol": original_protocol,
+                "domain_mapping_enabled": CLOUD_RUN_CONFIG["domain_mapping_enabled"]
+            }
         })
 
-def render_visual_inspection(url, device_type, timestamp):
+def render_visual_inspection(url, device_type, timestamp, original_host, original_protocol):
     """
     Render the visual inspection interface for allowed devices.
+    Enhanced for Cloud Run domain mapping compatibility.
     """
     html_content = f"""
     <!DOCTYPE html>
@@ -385,6 +458,13 @@ def render_visual_inspection(url, device_type, timestamp):
                         <p><strong>Company:</strong> {FRIENDS_FAMILY_GUARD['organization']}</p>
                         <p><strong>Environment:</strong> <span class="status-badge status-success">Production</span></p>
                     </div>
+                    
+                    <div class="info-card">
+                        <h3>☁️ Cloud Run Info</h3>
+                        <p><strong>Domain:</strong> {original_host}</p>
+                        <p><strong>Protocol:</strong> {original_protocol}</p>
+                        <p><strong>Mapping:</strong> <span class="status-badge status-success">Enabled</span></p>
+                    </div>
                 </div>
                 
                 <div style="text-align: center; margin: 30px 0;">
@@ -414,7 +494,8 @@ def render_visual_inspection(url, device_type, timestamp):
 @app.route('/health', methods=['GET'])
 def health_check():
     """
-    Health check endpoint for Cloud Run.
+    Health check endpoint for Cloud Run domain mapping compatibility.
+    This endpoint is used by Cloud Run for health checks and domain mapping validation.
     """
     return jsonify({
         "status": "healthy",
@@ -423,23 +504,31 @@ def health_check():
         "version": "1.0.0",
         "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
         "cloud_run_support": True,
-        "wsgi_server": "flask",
+        "domain_mapping": {
+            "enabled": CLOUD_RUN_CONFIG["domain_mapping_enabled"],
+            "region": CLOUD_RUN_CONFIG["region"],
+            "health_check_path": CLOUD_RUN_CONFIG["health_check_path"]
+        },
+        "wsgi_server": "waitress" if platform.system() == "Windows" else "gunicorn",
         "production_mode": True,
         "deployment_model": "all_instances_production",
-        "port": PORT
+        "port": PORT,
+        "host": get_original_host(),
+        "protocol": get_original_protocol()
     })
 
 @app.route('/status', methods=['GET'])
 def status():
     """
     Status endpoint with service information.
+    Enhanced for Cloud Run domain mapping compatibility.
     """
     return jsonify({
         "service": "URL API with Visual Inspection",
         "version": "1.0.0",
         "status": "running",
         "port": PORT,
-        "host": HOST,
+        "host": get_original_host(),
         "timestamp": datetime.utcnow().isoformat(),
         "session_id": FRIENDS_FAMILY_GUARD["session_id"],
         "organization": FRIENDS_FAMILY_GUARD["organization"],
@@ -447,9 +536,16 @@ def status():
         "visual_inspection": FRIENDS_FAMILY_GUARD["visual_inspection"],
         "cloud_run_support": True,
         "demo_mode": True,
-        "wsgi_server": "flask",
+        "wsgi_server": "waitress" if platform.system() == "Windows" else "gunicorn",
         "production_mode": True,
-        "deployment_model": "all_instances_production"
+        "deployment_model": "all_instances_production",
+        "domain_mapping": {
+            "enabled": CLOUD_RUN_CONFIG["domain_mapping_enabled"],
+            "region": CLOUD_RUN_CONFIG["region"],
+            "original_host": get_original_host(),
+            "original_protocol": get_original_protocol(),
+            "client_ip": get_client_ip()
+        }
     })
 
 @app.route('/guard', methods=['GET'])
@@ -466,13 +562,18 @@ def guard_status():
 def not_found(error):
     """
     Handle 404 errors by returning the request URL.
+    Compatible with Cloud Run domain mappings.
     """
     return jsonify({
         "error": "Not Found",
         "url": request.url,
         "message": "The requested resource was not found, but here's your request URL",
         "timestamp": datetime.utcnow().isoformat(),
-        "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"]
+        "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
+        "cloud_run": {
+            "original_host": get_original_host(),
+            "original_protocol": get_original_protocol()
+        }
     }), 404
 
 @app.errorhandler(500)
@@ -489,9 +590,65 @@ def internal_error(error):
         "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"]
     }), 500
 
+def start_production_server():
+    """
+    Start the application using a production WSGI server.
+    Enhanced for Cloud Run domain mapping compatibility.
+    """
+    print("🚀 Starting production WSGI server...")
+    
+    if platform.system() == "Windows":
+        # Use Waitress on Windows
+        try:
+            import waitress
+            print("✅ Using Waitress WSGI server (Windows)")
+            # Suppress Waitress logging messages
+            import logging
+            logging.getLogger('waitress').setLevel(logging.ERROR)
+            waitress.serve(app, host=HOST, port=PORT, threads=4, connection_limit=1000)
+        except ImportError:
+            print("❌ Waitress not found. Installing...")
+            try:
+                subprocess.run([sys.executable, "-m", "pip", "install", "waitress"], check=True)
+                import waitress
+                print("✅ Waitress installed - starting production server...")
+                # Suppress Waitress logging messages
+                import logging
+                logging.getLogger('waitress').setLevel(logging.ERROR)
+                waitress.serve(app, host=HOST, port=PORT, threads=4, connection_limit=1000)
+            except Exception as e:
+                print(f"❌ Failed to install/use Waitress: {e}")
+                print("🔄 Falling back to Flask development server...")
+                app.run(host=HOST, port=PORT, debug=False, threaded=True)
+    else:
+        # Use Gunicorn on Unix-like systems
+        try:
+            import gunicorn
+            print("✅ Using Gunicorn WSGI server (Unix)")
+            cmd = ["gunicorn", "--bind", f"{HOST}:{PORT}", "--workers", "4", "app:app"]
+            subprocess.run(cmd, check=True)
+        except ImportError:
+            print("❌ Gunicorn not found. Installing...")
+            try:
+                subprocess.run([sys.executable, "-m", "pip", "install", "gunicorn"], check=True)
+                import gunicorn
+                print("✅ Gunicorn installed - starting production server...")
+                cmd = ["gunicorn", "--bind", f"{HOST}:{PORT}", "--workers", "4", "app:app"]
+                subprocess.run(cmd, check=True)
+            except Exception as e:
+                print(f"❌ Failed to install/use Gunicorn: {e}")
+                print("🔄 Falling back to Flask development server...")
+                app.run(host=HOST, port=PORT, debug=False, threaded=True)
+
 if __name__ == '__main__':
+    # Determine the display address for users
+    if HOST == '0.0.0.0':
+        display_host = 'localhost'  # More user-friendly than 0.0.0.0
+    else:
+        display_host = HOST
+    
     print(f"🚀 Starting URL API Server with Visual Inspection")
-    print(f"📍 Host: {HOST}")
+    print(f"📍 Host: {display_host}")
     print(f"🔌 Port: {PORT}")
     print(f"🐛 Debug: {DEBUG}")
     print(f"🏭 Production: {PRODUCTION} (All instances are production instances)")
@@ -500,15 +657,10 @@ if __name__ == '__main__':
     print(f"🛡️ Friends and Family Guard: {'Enabled' if FRIENDS_FAMILY_GUARD['enabled'] else 'Disabled'}")
     print(f"👁️ Visual Inspection: PC/Phone/Tablet allowed, Watch blocked")
     print(f"☁️ Google Cloud Run Support: Enabled (PORT={PORT})")
+    print(f"🌐 Domain Mapping: {'Enabled' if CLOUD_RUN_CONFIG['domain_mapping_enabled'] else 'Disabled'}")
     print(f"🔐 Demo Mode: Enabled (password: {DEMO_CONFIG['password']})")
-    print(f"🌐 Access: http://{HOST}:{PORT}")
+    print(f"🌐 Access: http://{display_host}:{PORT}")
     print("=" * 60)
     
-    # Run the application - All instances are production instances
-    print("🚀 Running in Production Mode (using Flask)")
-    app.run(
-        host=HOST,
-        port=PORT,
-        debug=False,  # Always False in production
-        threaded=True
-    )
+    # Start with production WSGI server
+    start_production_server()

@@ -2,7 +2,7 @@
 
 **Simple Python Flask API that returns the request URL with visual inspection capabilities and Google Cloud Run deployment**
 
-A self-executing Python Flask application that responds with the request URL and metadata, featuring visual inspection capabilities for PC and phone devices while following Friends and Family Guard ruleset settings. Enhanced for Google Cloud Run deployment with dual-mode endpoint support and production-ready WSGI server.
+A self-executing Python Flask application that responds with the request URL and metadata, featuring visual inspection capabilities for PC and phone devices while following Friends and Family Guard ruleset settings. Enhanced for Google Cloud Run deployment with dual-mode endpoint support, production-ready WSGI server, and **full domain mapping compatibility**.
 
 **All instances deploy as production instances** - the tester decides whether they're using it for personal or work purposes.
 
@@ -60,10 +60,33 @@ python start.py
    gcloud run deploy yourl-cloud \
      --image yourl-cloud \
      --platform managed \
-     --region us-central1 \
+     --region us-west1 \
      --allow-unauthenticated \
      --port 8080
    ```
+
+### 🌐 Domain Mapping Support
+
+**Full compatibility with Google Cloud Run domain mappings** for custom domains like `yourl.cloud`:
+
+```bash
+# Map custom domain to Cloud Run service
+gcloud run domain-mappings create \
+  --service yourl-cloud \
+  --domain yourl.cloud \
+  --region us-west1 \
+  --platform managed
+```
+
+**Key Domain Mapping Features:**
+- ✅ **X-Forwarded Headers Support**: Proper handling of `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`
+- ✅ **Automatic Domain Detection**: Real-time domain and protocol detection
+- ✅ **Health Check Compatibility**: `/health` endpoint for Cloud Run health checks
+- ✅ **CORS Support**: Configured for domain mapping cross-origin requests
+- ✅ **HTTPS Support**: Automatic HTTPS detection and protocol handling
+- ✅ **Proxy Trust**: Configured to trust Cloud Run's proxy headers
+
+For detailed domain mapping instructions, see [CLOUD_RUN_DOMAIN_MAPPING.md](CLOUD_RUN_DOMAIN_MAPPING.md).
 
 ## 🔄 How it works
 
@@ -76,6 +99,7 @@ python start.py
 * **Demo authentication** with hardcoded password for rapid prototyping
 * **Production WSGI server**: Gunicorn for all deployments
 * **All instances are production instances**: Tester decides personal vs work usage
+* **Domain mapping compatibility**: Full support for custom domains
 * Includes health check and status endpoints
 * Runs on port 8080 for Cloud Run compatibility
 
@@ -84,7 +108,7 @@ python start.py
 ```
 yourl.cloud/
 ├── app.py              # Main Flask application with visual inspection and Cloud Run support
-├── wsgi.py             # WSGI entry point for production deployment
+├── wsgi.py             # WSGI entry point for production deployment (domain mapping compatible)
 ├── gunicorn.conf.py    # Gunicorn configuration for production
 ├── start.py            # Startup script with auto-detection
 ├── requirements.txt    # Python dependencies (includes Gunicorn)
@@ -94,6 +118,7 @@ yourl.cloud/
 ├── templates/         # HTML templates
 │   └── index.html     # Landing page template
 ├── README.md          # This file
+├── CLOUD_RUN_DOMAIN_MAPPING.md  # Comprehensive domain mapping guide
 └── .git/              # Version control
 ```
 

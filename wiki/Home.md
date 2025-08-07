@@ -1,39 +1,32 @@
-# URL API Server with Visual Inspection
+# Yourl.Cloud - URL API Server with Visual Inspection
 
-**Last Updated**: 2025-08-06T12:00:00.000000
+**Last Updated**: 2025-08-07T11:13:57.660955
 **Session ID**: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 **Organization**: Yourl Cloud Inc.
+**Branch**: main
+**Commit**: edaea214
+**Commit Date**: 2025-08-07 03:44:53 -0700
 
-## Project Overview
+## 🎯 Project Overview
 
-This is a simple Python Flask API that returns the request URL with visual inspection capabilities. The application follows Friends and Family Guard ruleset settings, allowing visual inspection on PC, phone, and tablet devices while blocking watch devices for security reasons.
+Yourl.Cloud is a production-ready Python Flask API that returns the request URL with advanced visual inspection capabilities. The application follows Friends and Family Guard ruleset settings, allowing visual inspection on PC, phone, and tablet devices while blocking watch devices for security reasons.
 
-## Current Features
+**Key Innovation**: Full Google Cloud Run domain mapping compatibility with automatic X-Forwarded header support.
 
-- ✅ **URL API**: Returns request URL and metadata in JSON format
-- ✅ **Visual Inspection**: Modern web interface for allowed devices
-- ✅ **Device Detection**: Automatic detection of PC, phone, tablet, watch
-- ✅ **Friends and Family Guard**: Security ruleset compliance
-- ✅ **Real-time Updates**: Auto-refresh every 30 seconds
-- ✅ **Accessibility**: Responsive design for all screen sizes
+## ✅ Current Features
 
-## Device Support
+- 🌐 **Cloud Run Domain Mapping**: Full compatibility with custom domains
+- 🛡️ **Friends and Family Guard**: Security ruleset compliance
+- 👁️ **Visual Inspection**: Modern web interface for allowed devices
+- 📱 **Device Detection**: Automatic detection of PC, phone, tablet, watch
+- 🏥 **Health Checks**: Cloud Run compatible health endpoints
+- 🔗 **X-Forwarded Headers**: Proper proxy header handling
+- 🚀 **WSGI Server**: Production-ready Gunicorn/Waitress support
+- 🌍 **Domain Mapping**: Custom domain support (yourl.cloud)
 
-| Device Type | Visual Inspection | Status |
-|-------------|-------------------|--------|
-| PC          | ✅ Allowed        | Full access |
-| Phone       | ✅ Allowed        | Full access |
-| Tablet      | ✅ Allowed        | Full access |
-| Watch       | ❌ Blocked        | Security rule |
+## 🚀 Quick Start
 
-## API Endpoints
-
-- `GET /` - Main endpoint (JSON or HTML)
-- `GET /health` - Health check
-- `GET /status` - Service status
-- `GET /guard` - Friends and Family Guard status
-
-## Quick Start
+### Local Development
 
 ```bash
 # Clone repository
@@ -43,33 +36,153 @@ cd yourl.cloud
 # Install dependencies
 pip install -r requirements.txt
 
-# Run application
+# Run application (All instances are production instances)
 python app.py
 ```
 
-## Friends and Family Guard
+### Cloud Run Deployment
 
-The application implements a security ruleset that:
-- Allows visual inspection on PC, phone, and tablet devices
-- Blocks visual inspection on watch devices for security
-- Provides transparent status reporting
-- Ensures appropriate access control
+```bash
+# Build and deploy
+gcloud builds submit --tag gcr.io/$PROJECT_ID/yourl-cloud .
+gcloud run deploy yourl-cloud \
+  --image gcr.io/$PROJECT_ID/yourl-cloud:latest \
+  --region=us-west1 \
+  --platform=managed \
+  --allow-unauthenticated \
+  --port=8080
 
-## Timeline
+# Map custom domain
+gcloud run domain-mappings create \
+  --service yourl-cloud \
+  --domain yourl.cloud \
+  --region us-west1 \
+  --platform managed
+```
 
-- **2025-08-06**: Initial implementation with visual inspection
-- **2025-08-06**: Friends and Family Guard ruleset implementation
-- **2025-08-06**: Device detection and access control
-- **2025-08-06**: Wiki automation and documentation
+## 📱 Device Support
 
-## Context
+| Device Type | Visual Inspection | Status | Security |
+|-------------|-------------------|--------|----------|
+| PC          | ✅ Allowed        | Full access | Friends & Family Guard |
+| Phone       | ✅ Allowed        | Full access | Friends & Family Guard |
+| Tablet      | ✅ Allowed        | Full access | Friends & Family Guard |
+| Watch       | ❌ Blocked        | Security rule | Friends & Family Guard |
 
-This project evolved from a simple URL API to include visual inspection capabilities while maintaining security through the Friends and Family Guard ruleset. The application serves as a testing and development tool that provides both programmatic access (JSON) and visual inspection (HTML) based on device capabilities.
+## 🔌 API Endpoints
 
-## Source of Truth
+- `GET /` - Main endpoint (JSON or HTML with domain info)
+- `GET /health` - Health check with Cloud Run compatibility
+- `GET /status` - Service status with domain mapping info
+- `GET /guard` - Friends and Family Guard status
+- `GET /api` - Visual inspection interface
 
-**yourl.cloud** is always the source of truth for latest information. This wiki is automatically updated from the main repository.
+## 🛡️ Friends and Family Guard
+
+The application implements a comprehensive security ruleset that:
+- ✅ Allows visual inspection on PC, phone, and tablet devices
+- ❌ Blocks visual inspection on watch devices for security
+- 🔍 Provides transparent status reporting
+- 🎯 Ensures appropriate access control
+- 🌐 Supports domain mapping with X-Forwarded headers
+
+## 🌍 Domain Mapping Features
+
+### ✅ Implemented Features
+- **X-Forwarded Headers Support**: Proper handling of `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`
+- **Health Check Endpoint**: `/health` endpoint for Cloud Run health checks
+- **CORS Compatibility**: Configured for domain mapping cross-origin requests
+- **HTTPS Support**: Automatic HTTPS detection and protocol handling
+- **Proxy Trust**: Configured to trust Cloud Run's proxy headers
+- **Domain Detection**: Real-time domain and protocol detection
+
+### 🔧 Configuration
+```python
+CLOUD_RUN_CONFIG = {
+    "domain_mapping_enabled": True,
+    "region": "us-west1",
+    "trust_proxy": True,
+    "cors_enabled": True,
+    "health_check_path": "/health",
+    "readiness_check_path": "/health"
+}
+```
+
+## 📅 Timeline
+
+### Recent Development
+- **2025-08-07**: Current - Cloud Run Domain Mapping Implementation
+
+### Key Milestones
+- **2025-08-07**: Cloud Run Domain Mapping Implementation
+- **2025-08-07**: X-Forwarded Headers Support
+- **2025-08-07**: Health Check Compatibility
+- **2025-08-07**: Production WSGI Server Integration
+- **2025-08-06**: Friends and Family Guard Implementation
+- **2025-08-06**: Visual Inspection Interface
+- **2025-08-06**: Device Detection System
+
+## 🔮 Future Roadmap
+
+### Planned Features
+- 🔐 **Enhanced Authentication**: OAuth 2.0 integration
+- 📊 **Analytics Dashboard**: Usage metrics and monitoring
+- 🔄 **Auto-scaling**: Advanced Cloud Run scaling policies
+- 🛡️ **Security Scanning**: Automated vulnerability detection
+- 🌐 **Multi-region**: Global deployment support
+
+### Development Priorities
+1. **Security Hardening**: Advanced security features
+2. **Performance Optimization**: Enhanced caching and CDN
+3. **Monitoring**: Comprehensive logging and alerting
+4. **Documentation**: Enhanced guides and tutorials
+
+## 🏗️ Architecture
+
+### Current Stack
+- **Backend**: Python Flask 3.0.2
+- **WSGI Server**: Gunicorn (Unix) / Waitress (Windows)
+- **Deployment**: Google Cloud Run
+- **Domain**: yourl.cloud (custom domain mapping)
+- **Security**: Friends and Family Guard ruleset
+
+### Production Features
+- ✅ **All instances are production instances**
+- ✅ **Automatic health checks**
+- ✅ **Domain mapping compatibility**
+- ✅ **X-Forwarded header support**
+- ✅ **HTTPS enforcement**
+- ✅ **Error handling and logging**
+
+## 📚 Documentation
+
+### Key Documents
+- **[README.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/README.md)**: Main project documentation
+- **[CLOUD_RUN_DOMAIN_MAPPING.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/CLOUD_RUN_DOMAIN_MAPPING.md)**: Domain mapping guide
+- **[STATUS.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/STATUS.md)**: Current project status
+- **[SECURITY.md](https://github.com/XDM-ZSBW/yourl.cloud/blob/main/SECURITY.md)**: Security policy
+
+## 🎯 Context
+
+This project evolved from a simple URL API to a comprehensive cloud-native application with:
+- **Visual inspection capabilities** for modern web interfaces
+- **Security-first approach** with Friends and Family Guard
+- **Cloud Run compatibility** for scalable deployment
+- **Domain mapping support** for custom domains
+- **Production-ready architecture** with WSGI servers
+
+The application serves as both a testing/development tool and a production service, providing programmatic access (JSON) and visual inspection (HTML) based on device capabilities and security rules.
+
+## 🔗 Source of Truth
+
+**yourl.cloud** is always the source of truth for latest information. This wiki is automatically updated from the main repository after each commit.
+
+### Wiki Update Process
+1. **Automatic Updates**: Wiki updates after each commit
+2. **Linear Progression**: README.md maintains current state
+3. **Past/Present/Future**: Wiki includes historical context and future roadmap
+4. **Real-time Sync**: Wiki reflects current repository state
 
 ---
 
-*Generated on 2025-08-07T05:30:05.976597*
+*Generated on 2025-08-07T11:13:57.660955 | Branch: main | Commit: edaea214*
