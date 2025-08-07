@@ -94,6 +94,12 @@ DEMO_CONFIG = {
             "name": "Perplexity AI",
             "url": "https://perplexity.ai",
             "description": "AI-powered search and assistance"
+        },
+        {
+            "id": 5,
+            "name": "Cursor IDE",
+            "url": "https://cursor.sh",
+            "description": "AI-powered code editor"
         }
     ]
 }
