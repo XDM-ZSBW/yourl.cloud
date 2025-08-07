@@ -3,483 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yourl-Cloud Inc. - AI-Friendly Service Hub</title>
-    
-    <!-- AI-Friendly Meta Tags -->
-    <meta name="ai-service-entry-points" content="myl.zip">
-    <meta name="ai-ethics-framework" content="myl.zip-standards">
-    <meta name="description" content="Yourl-Cloud Inc. - AI-friendly service hub providing transparent access to services you use already and maybe some you will use in the future.">
-    <meta name="session-id" content="f1d78acb-de07-46e0-bfa7-f5b75e3c0c49">
+    <title>Yourl-Cloud Inc. - Domain Display</title>
+    <meta name="description" content="Yourl-Cloud Inc. - Simple domain display service">
     <meta name="organization" content="Yourl-Cloud Inc.">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root {
-            --primary-color: #0066cc;
-            --success-color: #28a745;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-        }
-
-        .sidebar-sticky {
-            position: sticky;
-            top: 2rem;
-            height: fit-content;
-        }
-
-        .sidebar-sticky .card {
-            transition: all 0.3s ease;
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-sticky .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .main-content {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            border: none;
-            border-radius: 25px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #0052a3;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.3);
-        }
-
-        .card {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-
-        .footer {
-            background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 2rem 0;
-            margin-top: 3rem;
         }
-
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
         }
-
-        .status-online {
-            background: var(--success-color);
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        
+        .domain-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            word-break: break-all;
         }
-
-        .affiliate-links {
+        
+        .language-info {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 1rem 0;
+        }
+        
+        .status {
+            font-size: 0.9rem;
+            opacity: 0.7;
             margin-top: 2rem;
-            padding: 2rem;
-            background: #f8f9fa;
-            border-radius: 15px;
         }
-
-        .organization-badge {
-            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            font-weight: 600;
-            display: inline-block;
+        
+        .organization {
+            font-size: 1.5rem;
+            font-weight: 300;
             margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .domain-display {
+                font-size: 1.8rem;
+            }
+            .organization {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-cloud me-2"></i>Yourl-Cloud Inc.
-            </a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text">
-                    <span class="status-indicator status-online"></span>
-                    <span id="status-text">Operational</span>
-                </span>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-lg-3">
-                <div class="sidebar-sticky">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-shield-alt me-2"></i>Security Status
-                            </h5>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>HTTPS</span>
-                                <span class="badge bg-success">Active</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>3FA Encryption</span>
-                                <span class="badge bg-success">Active</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>Trust Mesh</span>
-                                <span class="badge bg-success">Active</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-info-circle me-2"></i>Quick Info
-                            </h5>
-                            <p class="card-text">
-                                <strong>Session ID:</strong><br>
-                                <code>f1d78acb-de07-46e0-bfa7-f5b75e3c0c49</code>
-                            </p>
-                            <p class="card-text">
-                                <strong>Organization:</strong><br>
-                                Yourl-Cloud Inc.
-                            </p>
-                            <p class="card-text">
-                                <strong>Status:</strong><br>
-                                <span class="badge bg-success">Operational</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Main Content -->
-            <div class="col-lg-9">
-                <div class="main-content">
-                    <div class="organization-badge">
-                        <i class="fas fa-building me-2"></i>Yourl-Cloud Inc.
-                    </div>
-                    
-                    <h1 class="mb-4">
-                        <i class="fas fa-cloud me-2"></i>AI-Friendly Service Hub
-                    </h1>
-                    
-                    <p class="lead">
-                        Welcome to Yourl-Cloud Inc.'s ethical, AI-friendly service hub. 
-                        We provide transparent access to services you use already and maybe some you will use in the future.
-                    </p>
-
-                    <!-- Link Shortener Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-link me-2"></i>Link Management
-                            </h5>
-                            <div class="input-group mb-3">
-                                <input type="url" class="form-control" id="linkInput" placeholder="Enter your URL here...">
-                                <button class="btn btn-primary" type="button" id="shortenBtn">
-                                    <i class="fas fa-compress-alt me-2"></i>Shorten
-                                </button>
-                            </div>
-                            <div id="result" class="mt-3"></div>
-                        </div>
-                    </div>
-
-                    <!-- 3FA Encryption Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-lock me-2"></i>3FA Encryption System
-                            </h5>
-                            <p class="card-text">
-                                Three-Factor Authentication for social proximity influence scores with 256-bit AES-GCM encryption.
-                            </p>
-                            <div id="3fa-status" class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>3FA system is active and ready
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Trust Mesh Network Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-network-wired me-2"></i>Trust Mesh Network
-                            </h5>
-                            <p class="card-text">
-                                CA NONPROFIT trust architecture with ethical service access and healthcare integration.
-                            </p>
-                            <div id="trust-mesh-status" class="alert alert-success">
-                                <i class="fas fa-check-circle me-2"></i>Trust mesh network is operational
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- LinkedIn Authentication Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fab fa-linkedin me-2"></i>LinkedIn Authentication
-                            </h5>
-                            <p class="card-text">
-                                Secure OAuth 2.0 integration with encrypted token storage and 3FA enhancement.
-                            </p>
-                            <div id="linkedin-auth-container">
-                                <button class="btn btn-outline-primary" id="linkedin-login">
-                                    <i class="fab fa-linkedin me-2"></i>Sign in with LinkedIn
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Beta Journaling Tool Section -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-book-open me-2"></i>Secure Journaling Tool
-                                </h5>
-                                <span class="badge bg-warning text-dark">
-                                    <i class="fas fa-flask me-1"></i>CLOSED BETA
-                                </span>
-                            </div>
-                            <p class="card-text">
-                                Privacy-first journaling tool with automatic content erasure. 
-                                Your content never leaves your browser unless you explicitly save it.
-                            </p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6><i class="fas fa-shield-alt me-2"></i>Security Features</h6>
-                                    <ul class="small">
-                                        <li>3-minute timer with auto-erase</li>
-                                        <li>Content cleared on page blur</li>
-                                        <li>Local download only</li>
-                                        <li>No server storage</li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6><i class="fas fa-clock me-2"></i>Beta Access</h6>
-                                    <p class="small text-muted">
-                                        This is a closed beta feature. 
-                                        Access requires an invite code.
-                                    </p>
-                                    <a href="/beta/access" class="btn btn-outline-warning btn-sm">
-                                        <i class="fas fa-key me-2"></i>Request Beta Access
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Affiliate Links Section -->
-                    <div class="affiliate-links">
-                        <h4 class="text-center mb-4">
-                            <i class="fas fa-heart me-2"></i>Recommended Services & Partners
-                        </h4>
-                        <div class="text-center">
-                            <a href="https://perplexity.ai" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
-                                <i class="fas fa-brain me-2"></i>Perplexity AI
-                            </a>
-                            <a href="https://openai.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
-                                <i class="fas fa-robot me-2"></i>OpenAI
-                            </a>
-                            <a href="https://anthropic.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
-                                <i class="fas fa-microchip me-2"></i>Anthropic
-                            </a>
-                            <a href="https://github.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
-                                <i class="fab fa-github me-2"></i>GitHub
-                            </a>
-                            <a href="https://stackoverflow.com" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
-                                <i class="fab fa-stack-overflow me-2"></i>Stack Overflow
-                            </a>
-                            <a href="https://developer.mozilla.org" class="btn btn-outline-secondary m-1" target="_blank" rel="noopener">
-                                <i class="fab fa-firefox me-2"></i>MDN Web Docs
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="container">
+        <div class="organization">Yourl-Cloud Inc.</div>
+        <div class="domain-display" id="domainDisplay"></div>
+        <div class="language-info" id="languageInfo"></div>
+        <div class="status">
+            Session ID: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49<br>
+            Deployed: <span id="deployTime"></span>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Yourl-Cloud Inc.</h5>
-                    <p>AI-friendly service hub following ethical standards and practices.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p>
-                        <strong>Session ID:</strong> f1d78acb-de07-46e0-bfa7-f5b75e3c0c49<br>
-                        <strong>Status:</strong> <span class="status-indicator status-online"></span>Operational<br>
-                        <strong>HTTPS:</strong> <span class="badge bg-success">Active</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Application Scripts -->
-    <script src="crypto_3fa.js"></script>
-    <script src="trust_mesh_network.js"></script>
-    <script src="linkedin_auth.js"></script>
-    <script src="myl_zip_fallback.js"></script>
-    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const linkInput = document.getElementById('linkInput');
-            const shortenBtn = document.getElementById('shortenBtn');
+        // Get user's preferred language and display domain
+        function displayDomainInfo() {
+            const domain = window.location.hostname;
+            const protocol = window.location.protocol;
+            const fullDomain = `${protocol}//${domain}`;
             
-            // Session ID from meta tag
-            const sessionId = document.querySelector('meta[name="session-id"]').content;
-            console.log('Session ID:', sessionId);
+            // Get user's preferred language
+            const userLanguage = navigator.language || navigator.userLanguage || 'en';
+            const languageNames = {
+                'en': 'English',
+                'es': 'Español',
+                'fr': 'Français',
+                'de': 'Deutsch',
+                'it': 'Italiano',
+                'pt': 'Português',
+                'ru': 'Русский',
+                'zh': '中文',
+                'ja': '日本語',
+                'ko': '한국어'
+            };
             
-            // Initialize 3FA system
-            let auth, scoring, pki, encryption;
+            const languageName = languageNames[userLanguage.split('-')[0]] || userLanguage;
             
-            async function initialize3FA() {
-                try {
-                    auth = new ThreeFactorAuth();
-                    scoring = new SocialProximityScoring();
-                    pki = new PKIAuthorization();
-                    console.log('3FA system initialized');
-                } catch (error) {
-                    console.error('Failed to initialize 3FA:', error);
-                }
-            }
+            // Display domain
+            document.getElementById('domainDisplay').textContent = fullDomain;
             
-            // Initialize 3FA on page load
-            initialize3FA();
+            // Display language info
+            document.getElementById('languageInfo').textContent = 
+                `Your preferred language: ${languageName} (${userLanguage})`;
             
-            // Initialize LinkedIn Authentication
-            let linkedInAuthUI;
-            async function initializeLinkedInAuth() {
-                try {
-                    linkedInAuthUI = new LinkedInAuthUI('linkedin-auth-container');
-                    console.log('LinkedIn Auth initialized');
-                } catch (error) {
-                    console.error('Failed to initialize LinkedIn Auth:', error);
-                }
-            }
-            
-            // Initialize LinkedIn Auth on page load
-            initializeLinkedInAuth();
-            
-            // Initialize myl.zip Fallback System
-            let mylZipFallback;
-            async function initializeMylZipFallback() {
-                try {
-                    mylZipFallback = new MylZipFallback();
-                    const status = await mylZipFallback.initialize();
-                    console.log('myl.zip fallback system initialized:', status);
-                } catch (error) {
-                    console.error('Failed to initialize myl.zip fallback:', error);
-                }
-            }
-            
-            // Initialize myl.zip fallback on page load
-            initializeMylZipFallback();
-            
-            // Initialize Trust Mesh Network
-            let trustMeshNetwork;
-            async function initializeTrustMeshNetwork() {
-                try {
-                    trustMeshNetwork = new TrustMeshNetwork();
-                    await trustMeshNetwork.initialize();
-                    console.log('Trust mesh network initialized');
-                } catch (error) {
-                    console.error('Failed to initialize trust mesh network:', error);
-                }
-            }
-            
-            // Initialize trust mesh network on page load
-            initializeTrustMeshNetwork();
-            
-            // Link shortening functionality
-            shortenBtn.addEventListener('click', function() {
-                const url = linkInput.value.trim();
-                if (!url) {
-                    alert('Please enter a valid URL');
-                    return;
-                }
-                
-                // Simple URL validation
-                try {
-                    new URL(url);
-                } catch (e) {
-                    alert('Please enter a valid URL');
-                    return;
-                }
-                
-                // Generate shortened URL (in a real implementation, this would be stored)
-                const shortenedUrl = `https://yourl.cloud/${btoa(url).substring(0, 8)}`;
-                
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        <strong>Shortened URL:</strong><br>
-                        <a href="${shortenedUrl}" target="_blank">${shortenedUrl}</a>
-                    </div>
-                `;
-            });
-            
-            // Enter key support for link input
-            linkInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    shortenBtn.click();
-                }
-            });
-            
-            // Update status indicators
-            function updateStatus() {
-                const statusText = document.getElementById('status-text');
-                const now = new Date();
-                statusText.textContent = `Operational - ${now.toLocaleTimeString()}`;
-            }
-            
-            // Update status every 30 seconds
-            setInterval(updateStatus, 30000);
-            updateStatus();
-        });
+            // Display deployment time
+            document.getElementById('deployTime').textContent = new Date().toLocaleString();
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', displayDomainInfo);
+        
+        // Also run immediately in case DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', displayDomainInfo);
+        } else {
+            displayDomainInfo();
+        }
     </script>
 </body>
 </html>

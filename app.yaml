@@ -1,7 +1,7 @@
-# yourl.cloud - Google App Engine Configuration
-# ============================================
+# yourl.cloud - Google App Engine Configuration (Simplified)
+# ======================================================
 # 
-# Yourl-Cloud Inc. - AI-Friendly Service Hub
+# Yourl-Cloud Inc. - Simple Domain Display Service
 # Session ID: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 
 runtime: nodejs18
@@ -14,49 +14,29 @@ env_variables:
 
 automatic_scaling:
   target_cpu_utilization: 0.65
-  min_instances: 1
-  max_instances: 10
-  target_throughput_utilization: 0.6
+  min_instances: 0
+  max_instances: 5
 
 resources:
-  cpu: 1
-  memory_gb: 0.5
-  disk_size_gb: 10
+  cpu: 0.5
+  memory_gb: 0.25
+  disk_size_gb: 1
 
 handlers:
   # Serve static files
   - url: /(.*\.(gif|png|jpg|css|js|ico|woff|woff2|ttf|eot|svg))
-    static_files: \1
-    upload: .*\.(gif|png|jpg|css|js|ico|woff|woff2|ttf|eot|svg)
+    static_files: public/\1
+    upload: public/.*\.(gif|png|jpg|css|js|ico|woff|woff2|ttf|eot|svg)
     secure: always
 
   # Serve HTML files
   - url: /(.*\.html)
-    static_files: \1
-    upload: .*\.html
-    secure: always
-
-  # Health check endpoint
-  - url: /health
-    script: auto
-    secure: always
-
-  # Status endpoint
-  - url: /status
-    script: auto
+    static_files: public/\1
+    upload: public/.*\.html
     secure: always
 
   # Default handler - serve index.html
   - url: /.*
-    static_files: index.html
-    upload: index.html
+    static_files: public/index.html
+    upload: public/index.html
     secure: always
-
-inbound_services:
-  - warmup
-
-beta_settings:
-  cloud_sql_instances: ""
-
-vpc_access_connector:
-  name: "projects/${PROJECT_ID}/locations/${REGION}/connectors/yourl-cloud-connector"
