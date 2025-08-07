@@ -51,6 +51,76 @@ yourl.cloud/
    python reset
    ```
 
+## 🐳 Docker Deployment
+
+### Quick Docker Setup
+
+1. **Build and run with Docker**:
+   ```bash
+   # Unix/Linux/macOS
+   ./docker-build.sh run
+   
+   # Windows
+   docker-build.bat run
+   ```
+
+2. **Access the application**:
+   - **Main Application**: http://localhost:8080
+   - **Health Check**: http://localhost:8080/health
+   - **Status**: http://localhost:8080/status
+
+### Docker Commands
+
+```bash
+# Build image only
+./docker-build.sh build
+
+# Run container
+./docker-build.sh run
+
+# Start container (if not running)
+./docker-build.sh start
+
+# Stop container
+./docker-build.sh stop
+
+# View logs
+./docker-build.sh logs
+
+# Check status
+./docker-build.sh status
+
+# Clean up
+./docker-build.sh clean
+
+# Show help
+./docker-build.sh help
+```
+
+### Docker Compose
+
+For more advanced deployments, use Docker Compose:
+
+```bash
+# Start with Docker Compose
+docker-compose up -d
+
+# Start with production profile
+docker-compose --profile production up -d
+
+# Stop services
+docker-compose down
+```
+
+### Docker Features
+
+- **🔒 Security**: Non-root user, security headers, rate limiting
+- **⚡ Performance**: Nginx optimization, gzip compression, caching
+- **🏥 Health Checks**: Automatic health monitoring
+- **📊 Monitoring**: Built-in status and health endpoints
+- **🔄 Auto-restart**: Container restart policy
+- **🌐 IPv6 Support**: Full IPv6 compatibility
+
 ## 🔧 Security Requirements
 
 - **HTTPS-only**: Secure connections required

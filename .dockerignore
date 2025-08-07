@@ -1,0 +1,94 @@
+# yourl.cloud - Docker Ignore File
+# ================================
+# 
+# Exclude unnecessary files from Docker build context
+# Session ID: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
+
+# Git and version control
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+LICENSE
+*.md
+
+# Development files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# Docker files (except the main Dockerfile)
+docker-compose*.yml
+.dockerignore
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Testing
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Temporary files
+tmp/
+temp/

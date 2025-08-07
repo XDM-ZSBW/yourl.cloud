@@ -1,0 +1,60 @@
+# yourl.cloud - Docker Compose Configuration
+# =========================================
+# 
+# Easy development and deployment configuration
+# Session ID: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
+
+version: '3.8'
+
+services:
+  yourl-cloud:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yourl-cloud
+    ports:
+      - "8080:80"
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    volumes:
+      # Optional: Mount for development (uncomment for live reload)
+      # - ./index.html:/usr/share/nginx/html/index.html:ro
+      # - ./myl_zip_fallback.js:/usr/share/nginx/html/myl_zip_fallback.js:ro
+      # - ./trust_mesh_network.js:/usr/share/nginx/html/trust_mesh_network.js:ro
+      # - ./linkedin_auth.js:/usr/share/nginx/html/linkedin_auth.js:ro
+      # - ./crypto_3fa.js:/usr/share/nginx/html/crypto_3fa.js:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - yourl-network
+
+  # Optional: Nginx reverse proxy for production
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: yourl-nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - yourl-cloud
+    restart: unless-stopped
+    networks:
+      - yourl-network
+    profiles:
+      - production
+
+networks:
+  yourl-network:
+    driver: bridge
+
+volumes:
+  yourl-data:
