@@ -129,6 +129,66 @@
             color: #ffd700;
         }
         
+        /* Project Resources Section - New styling for documentation and deployment news links */
+        .project-resources {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .project-resources h2 {
+            margin-bottom: 1rem;
+            color: #ffd700;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .resource-link {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .resource-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .resource-link .icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .resource-link .content h3 {
+            margin-bottom: 0.3rem;
+            color: #ffd700;
+            font-size: 1.1rem;
+        }
+        
+        .resource-link .content p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -141,6 +201,10 @@
             .input-group {
                 flex-direction: column;
             }
+            
+            .resources-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -149,6 +213,27 @@
         <div class="header">
             <h1>🔗 Yourl.Cloud</h1>
             <p>AI-Friendly Service Hub - Secure and Fast</p>
+        </div>
+        
+        <!-- Project Resources Section - Documentation and deployment news links -->
+        <div class="project-resources">
+            <h2>📚 Project Resources</h2>
+            <div class="resources-grid">
+                <a href="https://github.com/XDM-ZSBW/yourl.cloud/wiki" class="resource-link" target="_blank" title="Access comprehensive project documentation on GitHub Wiki">
+                    <div class="icon">📄</div>
+                    <div class="content">
+                        <h3>Documentation (GitHub Wiki)</h3>
+                        <p>Up-to-date project documentation and guides</p>
+                    </div>
+                </a>
+                <a href="https://github.com/XDM-ZSBW/yourl.cloud#readme" class="resource-link" target="_blank" title="View real-time deployment news and project status">
+                    <div class="icon">📢</div>
+                    <div class="content">
+                        <h3>Deployment News (README.md)</h3>
+                        <p>Real-time deployment news and project status</p>
+                    </div>
+                </a>
+            </div>
         </div>
         
         <div class="main-panel">
