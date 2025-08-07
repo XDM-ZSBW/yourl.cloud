@@ -8,7 +8,7 @@
     <!-- AI-Friendly Meta Tags -->
     <meta name="ai-service-entry-points" content="myl.zip">
     <meta name="ai-ethics-framework" content="myl.zip-standards">
-    <meta name="description" content="AI-friendly service hub providing ethical access to myl.zip services following myl.zip standards and practices">
+    <meta name="description" content="AI-friendly service hub providing transparent access to services you use already and maybe some you will use in the future.">
     <meta name="session-id" content="f1d78acb-de07-46e0-bfa7-f5b75e3c0c49">
     
     <!-- Bootstrap CSS -->
@@ -272,6 +272,9 @@
     <!-- LinkedIn Authentication -->
     <script src="linkedin_auth.js"></script>
     
+    <!-- myl.zip Fallback System -->
+    <script src="myl_zip_fallback.js"></script>
+    
     <!-- Custom JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -312,6 +315,26 @@
             
             // Initialize LinkedIn Auth on page load
             initializeLinkedInAuth();
+            
+            // Initialize myl.zip Fallback System
+            let mylZipFallback;
+            async function initializeMylZipFallback() {
+                try {
+                    mylZipFallback = new MylZipFallback();
+                    const status = await mylZipFallback.initialize();
+                    console.log('myl.zip Fallback System initialized:', status);
+                    
+                    // Show fallback notification if needed
+                    if (status.status === 'CACHED') {
+                        mylZipFallback.showFallbackNotification();
+                    }
+                } catch (error) {
+                    console.error('Failed to initialize myl.zip Fallback:', error);
+                }
+            }
+            
+            // Initialize myl.zip Fallback on page load
+            initializeMylZipFallback();
             
             // 3FA Encryption Demo Function
             async function demo3FAEncryption() {

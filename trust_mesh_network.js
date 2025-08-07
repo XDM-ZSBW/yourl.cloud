@@ -36,6 +36,16 @@ class TrustMeshNetwork {
                 audit: "REAL_TIME",
                 compliance: "SOC2_TYPE2"
             },
+            HEALTHCARE_LEVEL: {
+                encryption: "AES-256-GCM",
+                keySize: 256,
+                authentication: "3FA",
+                audit: "REAL_TIME",
+                compliance: "HIPAA",
+                patientPrivacy: true,
+                endToEndEncryption: true,
+                roleBasedAccess: true
+            },
             UTILITY_LEVEL: {
                 encryption: "AES-256-GCM", 
                 keySize: 256,
@@ -128,6 +138,7 @@ class TrustMeshNetwork {
             },
             thresholds: {
                 BANK_LEVEL: 0.95,
+                HEALTHCARE_LEVEL: 0.98,
                 UTILITY_LEVEL: 0.85,
                 MESH_LEVEL: 0.75
             }
@@ -147,6 +158,14 @@ class TrustMeshNetwork {
                 trustScore: 1.0,
                 securityLevel: this.securityLevels.BANK_LEVEL,
                 services: ["ai_ethics", "standards", "compliance"]
+            },
+            {
+                id: "provider_healthcare_gateway",
+                name: "Healthcare Gateway",
+                type: "HEALTHCARE",
+                trustScore: 0.98,
+                securityLevel: this.securityLevels.HEALTHCARE_LEVEL,
+                services: ["patient_data", "healthcare_compliance", "hipaa_audit"]
             },
             {
                 id: "provider_perplexity_ai",

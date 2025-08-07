@@ -76,41 +76,6 @@ yourl.cloud implements a **public, authorized solution for encrypting social pro
 2. **Factor 2**: OTP/Hardware Token (something you have)  
 3. **Factor 3**: 256-bit Random Key (something you possess)
 
-## 🔗 LinkedIn Social Authentication
-
-### OAuth 2.0 Integration
-yourl.cloud now supports **LinkedIn social logon** with secure OAuth 2.0 authentication:
-
-- **Secure OAuth 2.0 flow** with state parameter verification
-- **Encrypted token storage** using Web Crypto API
-- **Profile data access** (name, email, professional info)
-- **Automatic token refresh** and session management
-- **3FA integration** for enhanced security
-
-### Setup Instructions
-1. **Create LinkedIn App**:
-   - Visit [LinkedIn Developers](https://www.linkedin.com/developers/)
-   - Create a new app
-   - Get your Client ID and Client Secret
-
-2. **Configure OAuth**:
-   ```javascript
-   // Initialize LinkedIn Auth
-   const linkedInAuth = new LinkedInAuth();
-   linkedInAuth.init('YOUR_LINKEDIN_CLIENT_ID');
-   ```
-
-3. **Add to yourl.cloud**:
-   - LinkedIn authentication is already integrated
-   - Configure your Client ID in `linkedin_auth.js`
-   - Set up redirect URI: `https://yourl.cloud/auth/linkedin/callback`
-
-### Security Features
-- **256-bit AES-GCM encryption** for token storage
-- **State parameter verification** prevents CSRF attacks
-- **Secure session management** with automatic expiration
-- **Zero-knowledge architecture** - sensitive data encrypted locally
-
 ### Key Features
 - **256-bit AES-GCM encryption** for influence scores
 - **PKI-based authorization** for public/private key management
@@ -148,6 +113,123 @@ const signature = await pki.signScore(privateKey, encryptedScore);
 - **myl.zip compliance**: Ethical AI standards
 - **Zero-trust architecture**: Continuous verification
 
+## 🔗 LinkedIn Social Authentication
+
+### OAuth 2.0 Integration
+yourl.cloud now supports **LinkedIn social logon** with secure OAuth 2.0 authentication:
+
+- **Secure OAuth 2.0 flow** with state parameter verification
+- **Encrypted token storage** using Web Crypto API
+- **Profile data access** (name, email, professional info)
+- **Automatic token refresh** and session management
+- **3FA integration** for enhanced security
+
+### Setup Instructions
+1. **Create LinkedIn App**:
+   - Visit [LinkedIn Developers](https://www.linkedin.com/developers/)
+   - Create a new app
+   - Get your Client ID and Client Secret
+
+2. **Configure OAuth**:
+   ```javascript
+   // Initialize LinkedIn Auth
+   const linkedInAuth = new LinkedInAuth();
+   linkedInAuth.init('YOUR_LINKEDIN_CLIENT_ID');
+   ```
+
+3. **Add to yourl.cloud**:
+   - LinkedIn authentication is already integrated
+   - Configure your Client ID in `linkedin_auth.js`
+   - Set up redirect URI: `https://yourl.cloud/auth/linkedin/callback`
+
+### Security Features
+- **256-bit AES-GCM encryption** for token storage
+- **State parameter verification** prevents CSRF attacks
+- **Secure session management** with automatic expiration
+- **Zero-knowledge architecture** - sensitive data encrypted locally
+
+## 🔄 myl.zip Fallback System
+
+### Offline-First Architecture
+yourl.cloud implements a **robust fallback system** for myl.zip connections that ensures continuous access to ethical standards:
+
+- **Local Cache**: Uses `localStorage` with keys `myl.zip` and `myl.zip-standards`
+- **GitHub Cache**: Falls back to GitHub API when myl.zip is unreachable
+- **Offline Content**: Provides offline fallback with last known good state
+- **Connection Monitoring**: Real-time connection status checking
+
+### Fallback Strategy
+1. **Primary**: Direct connection to `https://myl.zip`
+2. **Secondary**: Local cache (24-hour expiry)
+3. **Tertiary**: GitHub cache (`https://api.github.com/repos/myl-zip/standards/contents`)
+4. **Final**: Offline fallback content
+
+### Features
+- **Automatic Detection**: Monitors myl.zip connectivity in real-time
+- **Smart Caching**: Stores content with SHA-256 checksums
+- **User Notifications**: Shows connection status and fallback warnings
+- **Healthcare Integration**: Includes healthcare trust level standards
+- **Session Persistence**: Maintains state across browser sessions
+
+### Usage Example
+```javascript
+// Initialize fallback system
+const mylZipFallback = new MylZipFallback();
+const status = await mylZipFallback.initialize();
+
+if (status.status === 'CACHED') {
+    mylZipFallback.showFallbackNotification();
+}
+```
+
+## 🌐 Trust Mesh Network
+
+### CA NONPROFIT Trust Architecture
+yourl.cloud implements a **conceptual Trust Mesh Network** for ethical service access:
+
+- **CA NONPROFIT Status**: Filing under review (Operating: August 4, 2025)
+- **Trust Levels**: Bank, Utility, Healthcare, and Mesh security standards
+- **Mesh Nodes**: Core, Gateway, and Distribution nodes
+- **Service Providers**: Integration with myl.zip, Perplexity AI, and Healthcare Gateway
+
+### Security Levels
+
+#### 🏦 BANK_LEVEL
+- **Encryption**: AES-256-GCM
+- **Authentication**: 3FA (Three-Factor Authentication)
+- **Audit**: REAL_TIME monitoring
+- **Compliance**: SOC2 Type 2
+- **Trust Score**: 0.95+ required
+
+#### 🏥 HEALTHCARE_LEVEL (NEW)
+- **Encryption**: AES-256-GCM
+- **Authentication**: 3FA with role-based access
+- **Audit**: REAL_TIME monitoring
+- **Compliance**: HIPAA, SOC2 Type 2, ISO27001
+- **Features**: Patient privacy, end-to-end encryption, role-based access
+- **Trust Score**: 0.98+ required
+
+#### ⚡ UTILITY_LEVEL
+- **Encryption**: AES-256-GCM
+- **Authentication**: 2FA
+- **Audit**: HOURLY monitoring
+- **Compliance**: ISO27001
+- **Trust Score**: 0.85+ required
+
+#### 🌐 MESH_LEVEL
+- **Encryption**: AES-256-GCM
+- **Authentication**: 1FA
+- **Audit**: DAILY monitoring
+- **Compliance**: GDPR
+- **Trust Score**: 0.75+ required
+
+### Healthcare Integration
+- **HIPAA Compliance**: Full healthcare data protection standards
+- **Patient Privacy**: End-to-end encryption for patient data
+- **Audit Trail**: Comprehensive logging for healthcare access
+- **Access Control**: Role-based access with 3FA authentication
+- **Healthcare Gateway**: Dedicated service provider for healthcare services
+
 ## 🌐 Access Points
 
 1. **Primary Service**: [https://yourl.cloud](https://yourl.cloud)
@@ -166,6 +248,11 @@ const signature = await pki.signScore(privateKey, encryptedScore);
 - **AES-256-GCM**: Military-grade encryption for influence scores
 - **PKI**: Public Key Infrastructure for authorization
 - **Web Crypto API**: Browser-native cryptographic operations
+- **myl.zip Fallback**: Offline-first architecture with GitHub cache
+- **Trust Mesh Network**: CA NONPROFIT trust architecture
+- **Healthcare Integration**: HIPAA-compliant healthcare trust level
+- **LinkedIn OAuth 2.0**: Social authentication integration
+- **Local Storage**: Client-side caching with dual-key strategy
 
 ## 📚 References and Attribution
 
