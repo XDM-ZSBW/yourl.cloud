@@ -1,11 +1,11 @@
 # Yourl.Cloud - URL API Server with Visual Inspection
 
-**Last Updated**: 2025-08-07T13:50:26.139888+00:00
+**Last Updated**: 2025-08-07T13:57:07.800584+00:00
 **Session ID**: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 **Organization**: Yourl Cloud Inc.
 **Branch**: main
-**Commit**: d2e26856
-**Commit Date**: 2025-08-07 06:47:58 -0700
+**Commit**: 71ca3411
+**Commit Date**: 2025-08-07 06:56:54 -0700
 
 ## 🎯 Project Overview
 
@@ -83,7 +83,7 @@ gcloud run domain-mappings create \
 The application features a dynamic, fun marketing password system that changes with each commit:
 
 ### 🎯 Current Marketing Password
-**`FLY239&`** - Generated for this commit!
+**`EXCITE414@`** - Generated for this commit!
 
 ### ✨ Password Features
 - **Dynamic Generation**: Changes with every code commit
@@ -141,11 +141,11 @@ CLOUD_RUN_CONFIG = {
 ## 📅 Timeline
 
 ### Recent Development
+- **71ca341**: Update wiki/Home.md with latest commit d2e26856 and new marketing password FLY239&
+- **9520eb6**: Fix deprecated datetime.utcnow() in auto_update.py - Replace with datetime.now(timezone.utc) - Resolve all deprecation warnings
+- **de61168**: Fix encoding warnings in update_wiki.py - Handle UTF-8 encoding properly for git commands - Replace deprecated datetime.utcnow() with datetime.now(timezone.utc) - Resolve character encoding issues in git timeline
 - **d2e2685**: Fix wiki sync issue - Skip wiki updates in post-commit mode to avoid infinite loops
 - **6bd74f5**: Update wiki/Home.md with latest commit ef504e5f
-- **ef504e5**: Update wiki/Home.md with latest commit 48d9a172 and marketing password WONDER920@
-- **48d9a17**: Sync wiki/Home.md with latest commit b0ec7fcc and marketing password CREW737^
-- **b0ec7fc**: Final sync: Update wiki/Home.md with commit 6a656a05
 
 ### Key Milestones
 - **2025-08-07**: Cloud Run Domain Mapping Implementation
@@ -219,4 +219,4 @@ The application serves as both a testing/development tool and a production servi
 
 ---
 
-*Generated on 2025-08-07T13:50:26.139888+00:00 | Branch: main | Commit: d2e26856*
+*Generated on 2025-08-07T13:57:07.800584+00:00 | Branch: main | Commit: 71ca3411*
