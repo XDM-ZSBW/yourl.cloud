@@ -6,8 +6,12 @@ options:
   logging: CLOUD_LOGGING_ONLY
   env:
     - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
-    - 'NOTIFICATION_EMAIL=bcherrman@gmail.com'
-    - 'DEPLOY_REGION=us-west1'
+
+# Substitutions
+substitutions:
+  _NOTIFICATION_EMAIL: 'bcherrman@gmail.com'
+  _DEPLOY_REGION: 'us-west1'
+  _TRIGGER_TYPE: 'manual'
 
 steps:
   # Generate marketing codes for this deployment
@@ -57,7 +61,7 @@ steps:
       - '--service-account'
       - 'automation-sa-yourl@$PROJECT_ID.iam.gserviceaccount.com'
       - '--region'
-      - 'us-west1'
+      - '${_DEPLOY_REGION}'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
@@ -92,11 +96,11 @@ steps:
         export CURRENT_CODE=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current | grep "Current public code" | cut -d: -f2 | tr -d ' ')
         export NEXT_CODE=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current | grep "Next public code" | cut -d: -f2 | tr -d ' ')
         
-        echo "Sending notification to $NOTIFICATION_EMAIL"
+        echo "Sending notification to ${_NOTIFICATION_EMAIL}"
         gcloud functions call sendBuildNotification \
-          --region us-west1 \
+          --region ${_DEPLOY_REGION} \
           --data '{
-            "to": "'$$NOTIFICATION_EMAIL'",
+            "to": "'${_NOTIFICATION_EMAIL}'",
             "message": {
               "subject": "Yourl.Cloud Deployment Status: '$$COMMIT_SHA'",
               "body": {
