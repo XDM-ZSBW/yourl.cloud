@@ -1,14 +1,17 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA', '.']
   
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'push'
     args: ['push', 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA']
   
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy'
     entrypoint: gcloud
     args:
       - 'run'
@@ -30,5 +33,60 @@ steps:
       - '--max-instances'
       - '10'
 
+  # Send email notification
+  - name: 'gcr.io/cloud-builders/curl'
+    id: 'notify'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cat > email.json << EOF
+        {
+          "to": "bcherrman@gmail.com",
+          "message": {
+            "subject": "Cloud Build Status: yourl.cloud $$COMMIT_SHA",
+            "body": {
+              "text": "Build Status: Success\nCommit: $$COMMIT_SHA\nBuild ID: $$BUILD_ID\nRepository: $$REPO_NAME\nBranch: $$BRANCH_NAME\n\nView build details: https://console.cloud.google.com/cloud-build/builds;region=global/$$BUILD_ID?project=$$PROJECT_ID"
+            }
+          }
+        }
+        EOF
+        curl -X POST -H "Authorization: Bearer $$(gcloud auth print-identity-token)" \
+             -H "Content-Type: application/json" \
+             https://us-central1-$$PROJECT_ID.cloudfunctions.net/sendBuildNotification \
+             -d @email.json
+
+  # Update GitHub status
+  - name: 'gcr.io/cloud-builders/curl'
+    id: 'github-status'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        curl -X POST \
+          -H "Authorization: token $$GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/$$REPO_OWNER/$$REPO_NAME/statuses/$$COMMIT_SHA \
+          -d '{
+            "state": "success",
+            "target_url": "https://console.cloud.google.com/cloud-build/builds;region=global/$$BUILD_ID?project=$$PROJECT_ID",
+            "description": "Cloud Build completed successfully",
+            "context": "cloud-build/status"
+          }'
+
 images:
   - 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA'
+
+# Timeout for the entire build process
+timeout: '1800s'
+
+# Substitutions for variables
+substitutions:
+  _NOTIFICATION_EMAIL: 'bcherrman@gmail.com'
+  _REGION: 'us-central1'
+
+# Tags for build identification
+tags:
+  - 'yourl-cloud'
+  - '$COMMIT_SHA'
+  - '$BRANCH_NAME'
