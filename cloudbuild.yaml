@@ -72,25 +72,16 @@ steps:
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
 
-  # Generate audit report and set environment variables
+  # Generate audit report
   - name: 'python:3.9'
     id: 'audit-report'
-    entrypoint: 'bash'
+    entrypoint: python
     args:
-      - '-c'
-      - |
-        # Create codes directory
-        mkdir -p codes
-        
-        # Get current marketing codes
-        python scripts/marketing_code.py --project $PROJECT_ID --action get-current > codes/current.txt
-        
-        # Export codes as environment variables
-        echo "export CURRENT_CODE=$(grep 'Current public code' codes/current.txt | cut -d: -f2 | tr -d ' ')" >> /workspace/env.sh
-        echo "export NEXT_CODE=$(grep 'Next public code' codes/current.txt | cut -d: -f2 | tr -d ' ')" >> /workspace/env.sh
-        
-        # Generate audit report
-        python scripts/marketing_code.py --project $PROJECT_ID --action audit
+      - 'scripts/marketing_code.py'
+      - '--project'
+      - '$PROJECT_ID'
+      - '--action'
+      - 'audit'
     env:
       - 'PYTHONPATH=/workspace'
 
@@ -101,32 +92,26 @@ steps:
     args:
       - '-c'
       - |
-        # Source environment variables
-        source /workspace/env.sh
-        
-        echo "Sending notification to ${_NOTIFICATION_EMAIL}"
+        echo "Sending deployment notification"
         gcloud functions call sendBuildNotification \
           --region ${_DEPLOY_REGION} \
           --data '{
             "to": "'${_NOTIFICATION_EMAIL}'",
             "message": {
-              "subject": "Yourl.Cloud Deployment Status: '$COMMIT_SHA'",
+              "subject": "Yourl.Cloud Deployment - '$COMMIT_SHA'",
               "body": {
-                "text": "Deployment Status: Success\nCommit: '$COMMIT_SHA'\nBuild ID: '$BUILD_ID'\nCurrent Marketing Code: '$CURRENT_CODE'\nNext Marketing Code: '$NEXT_CODE'\n\nView build details: https://console.cloud.google.com/cloud-build/builds;region=global/'$BUILD_ID'?project='$PROJECT_ID'"
+                "text": "Deployment completed successfully.\n\nView build: https://console.cloud.google.com/cloud-build/builds;region=global/'$BUILD_ID'?project='$PROJECT_ID'"
               }
             }
           }'
 
-  # Update GitHub status with marketing codes
+  # Update GitHub status
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'github-status'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        # Source environment variables
-        source /workspace/env.sh
-        
         curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
@@ -134,7 +119,7 @@ steps:
           -d '{
             "state": "success",
             "target_url": "https://console.cloud.google.com/cloud-build/builds;region=global/'$BUILD_ID'?project='$PROJECT_ID'",
-            "description": "Deployment successful - Marketing Code: '$NEXT_CODE'",
+            "description": "Deployment successful",
             "context": "yourl-cloud/deployment"
           }'
 
