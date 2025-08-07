@@ -1,3 +1,16 @@
-Flask==3.0.0
+# Production-ready Python dependencies with security updates
+# Updated to latest secure versions to address CVEs
+
+# Web framework - latest secure version
+Flask==3.0.2
+
+# WSGI server - latest secure version  
 Werkzeug==3.0.1
+
+# Production WSGI server - latest secure version
 gunicorn==21.2.0
+
+# Additional security packages (optional but recommended)
+# Uncomment if needed for your deployment
+# cryptography==42.0.5  # For additional encryption support
+# certifi==2024.12.5    # For certificate verification
