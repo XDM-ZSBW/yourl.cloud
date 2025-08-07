@@ -38,7 +38,24 @@ app = Flask(__name__)
 
 # Configuration - Google Cloud Run compatible with domain mapping support
 HOST = '0.0.0.0'  # Listen on all interfaces (required for Cloud Run)
-PORT = int(os.environ.get('PORT', 8080))  # Read PORT from environment (default 8080 for Cloud Run)
+
+# Port configuration - Use random available port for local development, 8080 for production
+if os.environ.get('PORT'):
+    # Production environment (Cloud Run) - use environment PORT
+    PORT = int(os.environ.get('PORT', 8080))
+else:
+    # Local development - use random available port
+    import socket
+    def find_free_port():
+        """Find a free port to use for local development"""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('', 0))  # Bind to any available port
+            s.listen(1)
+            port = s.getsockname()[1]
+        return port
+    
+    PORT = find_free_port()
+
 DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
 # Production mode detection - All instances deploy as production instances
 PRODUCTION = True  # Always production for all deployments
@@ -655,7 +672,7 @@ if __name__ == '__main__':
     
     print(f"🚀 Starting URL API Server with Visual Inspection")
     print(f"📍 Host: {display_host}")
-    print(f"🔌 Port: {PORT}")
+    print(f"🔌 Port: {PORT}" + (" (randomly selected)" if not os.environ.get('PORT') else " (production)"))
     print(f"🐛 Debug: {DEBUG}")
     print(f"🏭 Production: {PRODUCTION} (All instances are production instances)")
     print(f"🆔 Session: {FRIENDS_FAMILY_GUARD['session_id']}")
