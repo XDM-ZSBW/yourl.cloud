@@ -97,11 +97,18 @@ def main():
     # Check git status
     in_git = check_git_status()
     
+    # Check if we're in post-commit mode
+    is_post_commit = len(sys.argv) > 1 and sys.argv[1] == "--post-commit"
+    
     # Update README.md (linear progression)
     readme_success = run_script("update_readme.py", "Updating README.md (linear progression)")
     
-    # Update wiki (past/present/future context)
-    wiki_success = run_script("update_wiki.py", "Updating wiki (past/present/future context)")
+    # Update wiki (past/present/future context) - only if not in post-commit mode
+    if is_post_commit:
+        print("Skipping wiki update in post-commit mode to avoid sync issues")
+        wiki_success = True
+    else:
+        wiki_success = run_script("update_wiki.py", "Updating wiki (past/present/future context)")
     
     # Summary
     print("\n" + "="*60)
@@ -113,7 +120,8 @@ def main():
     if readme_success and wiki_success:
         print("\nAll documentation updated successfully!")
         print("README.md: Linear progression maintained")
-        print("Wiki: Past, present, and future context included")
+        if not is_post_commit:
+            print("Wiki: Past, present, and future context included")
         print("yourl.cloud is always the source of truth")
         return True
     else:
