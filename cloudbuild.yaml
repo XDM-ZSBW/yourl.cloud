@@ -72,16 +72,25 @@ steps:
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
 
-  # Generate audit report
+  # Generate audit report and set environment variables
   - name: 'python:3.9'
     id: 'audit-report'
-    entrypoint: python
+    entrypoint: 'bash'
     args:
-      - 'scripts/marketing_code.py'
-      - '--project'
-      - '$PROJECT_ID'
-      - '--action'
-      - 'audit'
+      - '-c'
+      - |
+        # Create codes directory
+        mkdir -p codes
+        
+        # Get current marketing codes
+        python scripts/marketing_code.py --project $PROJECT_ID --action get-current > codes/current.txt
+        
+        # Export codes as environment variables
+        echo "export CURRENT_CODE=$(grep 'Current public code' codes/current.txt | cut -d: -f2 | tr -d ' ')" >> /workspace/env.sh
+        echo "export NEXT_CODE=$(grep 'Next public code' codes/current.txt | cut -d: -f2 | tr -d ' ')" >> /workspace/env.sh
+        
+        # Generate audit report
+        python scripts/marketing_code.py --project $PROJECT_ID --action audit
     env:
       - 'PYTHONPATH=/workspace'
 
@@ -92,12 +101,8 @@ steps:
     args:
       - '-c'
       - |
-        # Get current marketing codes and store in file
-        python scripts/marketing_code.py --project $PROJECT_ID --action get-current > /workspace/codes.txt
-        
-        # Read codes from file
-        CURRENT_CODE=$(grep "Current public code" /workspace/codes.txt | cut -d: -f2 | tr -d ' ')
-        NEXT_CODE=$(grep "Next public code" /workspace/codes.txt | cut -d: -f2 | tr -d ' ')
+        # Source environment variables
+        source /workspace/env.sh
         
         echo "Sending notification to ${_NOTIFICATION_EMAIL}"
         gcloud functions call sendBuildNotification \
@@ -119,9 +124,8 @@ steps:
     args:
       - '-c'
       - |
-        # Read codes from file
-        CURRENT_CODE=$(grep "Current public code" /workspace/codes.txt | cut -d: -f2 | tr -d ' ')
-        NEXT_CODE=$(grep "Next public code" /workspace/codes.txt | cut -d: -f2 | tr -d ' ')
+        # Source environment variables
+        source /workspace/env.sh
         
         curl -X POST \
           -H "Authorization: token $GITHUB_TOKEN" \
