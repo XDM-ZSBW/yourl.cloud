@@ -8,15 +8,14 @@ Yourl.Cloud has successfully launched its beta friends and family version! This 
 
 ### **Deployment Information**
 - **Service Name**: `yourl-cloud`
-- **Project**: `zip-myl-dev`
 - **Region**: `us-west1`
 - **Status**: ✅ **FULLY OPERATIONAL**
 - **Version**: v1.0.0
 
 ### **Access URLs**
-- **Primary URL**: https://yourl-cloud-999241139016.us-west1.run.app
+- **Primary URL**: [Cloud Run URL] (configured)
 - **Custom Domain**: https://yourl.cloud (DNS configuration required)
-- **Health Check**: https://yourl-cloud-999241139016.us-west1.run.app/health
+- **Health Check**: [Health endpoint] (configured)
 
 ## 🎯 **Beta Features**
 
@@ -29,7 +28,7 @@ Yourl.Cloud has successfully launched its beta friends and family version! This 
 
 ### **Security Features**
 - 🛡️ **Device-Specific Access**: PC/Phone/Tablet allowed, Watch blocked
-- 🔐 **Demo Authentication**: Password-protected access (yourl2024)
+- 🔐 **Demo Authentication**: Password-protected access
 - 🌐 **HTTPS Enforcement**: Automatic SSL certificate provisioning
 - 🔗 **X-Forwarded Headers**: Proper proxy header handling
 
@@ -57,23 +56,9 @@ Yourl.Cloud has successfully launched its beta friends and family version! This 
 ## 🌐 **Domain Configuration**
 
 ### **DNS Records Required**
-To complete the setup, configure these DNS records for `yourl.cloud`:
+To complete the setup, configure DNS records for `yourl.cloud`:
 
-**A Records:**
-```
-yourl.cloud.    A    216.239.32.21
-yourl.cloud.    A    216.239.34.21
-yourl.cloud.    A    216.239.36.21
-yourl.cloud.    A    216.239.38.21
-```
-
-**AAAA Records (IPv6):**
-```
-yourl.cloud.    AAAA    2001:4860:4802:32::15
-yourl.cloud.    AAAA    2001:4860:4802:34::15
-yourl.cloud.    AAAA    2001:4860:4802:36::15
-yourl.cloud.    AAAA    2001:4860:4802:38::15
-```
+**Note**: DNS configuration details are available in the deployment documentation but not exposed publicly for security reasons.
 
 ## 🎉 **Acknowledgments**
 
@@ -180,7 +165,6 @@ From a simple URL API to a comprehensive cloud-native application with:
 
 ### **Service Details**
 - **Organization**: Yourl Cloud Inc.
-- **Project**: zip-myl-dev
 - **Region**: us-west1
 - **Service**: yourl-cloud
 - **Domain**: yourl.cloud
@@ -188,7 +172,7 @@ From a simple URL API to a comprehensive cloud-native application with:
 ### **Contact Information**
 - **GitHub Repository**: https://github.com/XDM-ZSBW/yourl.cloud
 - **Documentation**: See README.md and wiki for detailed information
-- **Health Status**: https://yourl-cloud-999241139016.us-west1.run.app/health
+- **Health Status**: [Health endpoint] (configured)
 
 ---
 
@@ -197,9 +181,9 @@ From a simple URL API to a comprehensive cloud-native application with:
 **Yourl.Cloud v1.0.0** is now **live and operational** for friends and family!
 
 ### **Access Information**
-- **Primary URL**: https://yourl-cloud-999241139016.us-west1.run.app
+- **Primary URL**: [Cloud Run URL] (configured)
 - **Custom Domain**: https://yourl.cloud (DNS configuration required)
-- **Demo Password**: yourl2024
+- **Demo Password**: [Configured]
 
 ### **Status**: ✅ **FULLY OPERATIONAL**
 - Service deployed and healthy

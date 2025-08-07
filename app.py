@@ -24,6 +24,9 @@ import logging
 import platform
 import subprocess
 import sys
+import webbrowser
+import threading
+import time
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -613,6 +616,23 @@ def internal_error(error):
         "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"]
     }), 500
 
+def launch_browser(url, delay=1.5):
+    """
+    Launch the default browser to the specified URL after a short delay.
+    This allows the server to start up before the browser tries to connect.
+    """
+    def _launch():
+        time.sleep(delay)  # Wait for server to start
+        try:
+            webbrowser.open(url)
+            print(f"🌐 Browser launched: {url}")
+        except Exception as e:
+            print(f"⚠️ Could not launch browser: {e}")
+    
+    # Launch browser in a separate thread to avoid blocking
+    browser_thread = threading.Thread(target=_launch, daemon=True)
+    browser_thread.start()
+
 def start_production_server():
     """
     Start the application using a production WSGI server.
@@ -672,18 +692,22 @@ if __name__ == '__main__':
     
     print(f"🚀 Starting URL API Server with Visual Inspection")
     print(f"📍 Host: {display_host}")
-    print(f"🔌 Port: {PORT}" + (" (randomly selected)" if not os.environ.get('PORT') else " (production)"))
     print(f"🐛 Debug: {DEBUG}")
     print(f"🏭 Production: {PRODUCTION} (All instances are production instances)")
     print(f"🆔 Session: {FRIENDS_FAMILY_GUARD['session_id']}")
     print(f"🏢 Organization: {FRIENDS_FAMILY_GUARD['organization']}")
     print(f"🛡️ Friends and Family Guard: {'Enabled' if FRIENDS_FAMILY_GUARD['enabled'] else 'Disabled'}")
     print(f"👁️ Visual Inspection: PC/Phone/Tablet allowed, Watch blocked")
-    print(f"☁️ Google Cloud Run Support: Enabled (PORT={PORT})")
+    print(f"☁️ Google Cloud Run Support: Enabled")
     print(f"🌐 Domain Mapping: {'Enabled' if CLOUD_RUN_CONFIG['domain_mapping_enabled'] else 'Disabled'}")
-    print(f"🔐 Demo Mode: Enabled (password: {DEMO_CONFIG['password']})")
-    print(f"🌐 Access: http://{display_host}:{PORT}")
+    print(f"🔐 Demo Mode: Enabled")
     print("=" * 60)
+    
+    # Launch browser for local development (not for production/Cloud Run)
+    if not os.environ.get('PORT'):
+        local_url = f"http://{display_host}:{PORT}"
+        print(f"🌐 Launching browser to: {local_url}")
+        launch_browser(local_url)
     
     # Start with production WSGI server
     start_production_server()

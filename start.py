@@ -22,7 +22,6 @@ def start_production():
     """Start the application in production mode using appropriate WSGI server."""
     print("🚀 Starting in Production Mode (WSGI server)")
     print(f"📍 Host: {HOST}")
-    print(f"🔌 Port: {PORT}")
     print("🏭 Production: True (All instances are production instances)")
     print("=" * 50)
     
