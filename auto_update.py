@@ -14,7 +14,7 @@ Organization: Yourl Cloud Inc.
 import os
 import sys
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 def run_script(script_name, description):
@@ -92,7 +92,7 @@ fi
 def main():
     """Main function to handle auto-updates."""
     print("Starting comprehensive documentation update...")
-    print(f"Timestamp: {datetime.utcnow().isoformat()}")
+    print(f"Timestamp: {datetime.now(timezone.utc).isoformat()}")
     
     # Check git status
     in_git = check_git_status()
