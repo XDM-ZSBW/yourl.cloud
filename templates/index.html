@@ -95,6 +95,46 @@
             transform: translateY(-2px);
         }
         
+        .marketing-code {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 2px solid #ffd700;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        
+        .marketing-code h2 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+        
+        .code-display {
+            font-family: monospace;
+            font-size: 1.5rem;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            user-select: all;
+            cursor: pointer;
+        }
+        
+        .code-hint {
+            font-style: italic;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
         .affiliate-links {
             margin-top: 2rem;
         }
@@ -129,7 +169,6 @@
             color: #ffd700;
         }
         
-        /* Project Resources Section - New styling for documentation and deployment news links */
         .project-resources {
             background: rgba(255, 255, 255, 0.15);
             border-radius: 15px;
@@ -215,34 +254,22 @@
             <p>AI-Friendly Service Hub - Secure and Fast</p>
         </div>
         
-        <!-- Project Resources Section - Documentation and deployment news links -->
-        <div class="project-resources">
-            <h2>📚 Project Resources</h2>
-            <div class="resources-grid">
-                <a href="https://github.com/XDM-ZSBW/yourl.cloud/wiki" class="resource-link" target="_blank" title="Access comprehensive project documentation on GitHub Wiki">
-                    <div class="icon">📄</div>
-                    <div class="content">
-                        <h3>Documentation (GitHub Wiki)</h3>
-                        <p>Up-to-date project documentation and guides</p>
-                    </div>
-                </a>
-                <a href="https://github.com/XDM-ZSBW/yourl.cloud#readme" class="resource-link" target="_blank" title="View real-time deployment news and project status">
-                    <div class="icon">📢</div>
-                    <div class="content">
-                        <h3>Deployment News (README.md)</h3>
-                        <p>Real-time deployment news and project status</p>
-                    </div>
-                </a>
+        <!-- Marketing Code Section -->
+        <div class="marketing-code">
+            <h2>🎯 Today's Access Code</h2>
+            <div class="code-display" onclick="this.select();" title="Click to copy">
+                {{ marketing_code }}
             </div>
+            <p class="code-hint">👆 Click to copy, then paste into the access box below to proceed to the next level!</p>
         </div>
         
         <div class="main-panel">
             <div class="input-section">
-                <h2>🔐 Access Control</h2>
+                <h2>🔐 Level Access</h2>
                 <form method="POST" action="/">
                     <div class="input-group">
-                        <input type="password" name="password" placeholder="Enter access password" required>
-                        <button type="submit" class="submit-btn">Submit</button>
+                        <input type="password" name="password" placeholder="Paste the access code here" required>
+                        <button type="submit" class="submit-btn">Proceed to Next Level</button>
                     </div>
                 </form>
             </div>
@@ -271,6 +298,27 @@
                         <p>AI-powered code editor</p>
                     </a>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Project Resources Section -->
+        <div class="project-resources">
+            <h2>📚 Project Resources</h2>
+            <div class="resources-grid">
+                <a href="https://github.com/XDM-ZSBW/yourl.cloud/wiki" class="resource-link" target="_blank">
+                    <div class="icon">📄</div>
+                    <div class="content">
+                        <h3>Documentation (GitHub Wiki)</h3>
+                        <p>Up-to-date project documentation and guides</p>
+                    </div>
+                </a>
+                <a href="https://github.com/XDM-ZSBW/yourl.cloud#readme" class="resource-link" target="_blank">
+                    <div class="icon">📢</div>
+                    <div class="content">
+                        <h3>Deployment News (README.md)</h3>
+                        <p>Real-time deployment news and project status</p>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
