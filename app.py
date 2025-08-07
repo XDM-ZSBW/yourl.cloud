@@ -80,6 +80,7 @@ def generate_marketing_password():
     """
     Generate a fun, marketing-friendly password that changes with each commit.
     Uses git commit hash to ensure consistency within a commit but changes between commits.
+    Only uses basic ASCII characters for maximum compatibility.
     """
     try:
         # Get the current git commit hash
@@ -89,7 +90,7 @@ def generate_marketing_password():
         # Fallback if git is not available
         commit_hash = hashlib.md5(str(datetime.utcnow()).encode()).hexdigest()[:8]
     
-    # Fun marketing words and phrases
+    # Fun marketing words and phrases (ASCII only)
     marketing_words = [
         "CLOUD", "FUTURE", "INNOVATE", "DREAM", "BUILD", "CREATE", "LAUNCH", "FLY",
         "SPARK", "SHINE", "GLOW", "RISE", "LEAP", "JUMP", "DASH", "ZOOM",
@@ -99,8 +100,8 @@ def generate_marketing_password():
         "FRIEND", "FAMILY", "TEAM", "SQUAD", "CREW", "GANG", "TRIBE", "CLAN"
     ]
     
-    # Fun emojis and symbols
-    emojis = ["🚀", "⭐", "🌟", "💫", "✨", "🔥", "⚡", "💎", "🎯", "🎪", "🎨", "🎭"]
+    # Fun ASCII symbols and characters
+    ascii_symbols = ["!", "@", "#", "$", "%", "&", "*", "+", "=", "?", "~", "^"]
     
     # Generate a deterministic but fun password using the commit hash
     # Convert commit hash to a number for seeding
@@ -110,14 +111,14 @@ def generate_marketing_password():
     # Pick a random marketing word
     word = random.choice(marketing_words)
     
-    # Pick a random emoji
-    emoji = random.choice(emojis)
+    # Pick a random ASCII symbol
+    symbol = random.choice(ascii_symbols)
     
     # Generate a short number (2-3 digits)
     number = random.randint(10, 999)
     
-    # Combine them in a fun way
-    password = f"{word}{number}{emoji}"
+    # Combine them in a fun way (ASCII only)
+    password = f"{word}{number}{symbol}"
     
     return password
 
