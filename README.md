@@ -313,6 +313,46 @@ if (status.status === 'CACHED') {
 }
 ```
 
+## 🌐 Transition from Offline to Online: myl.zip Becomes a Connected Service
+
+**Background:**  
+Originally, the `myl.zip` project was developed as a local tool for managing secure downloads and handling thread-based context for agents and users, with a focus on privacy-first, *offline* workflows.
+
+**Evolution:**  
+With advancements in secure web development and user demand for *online collaboration* and *short-term encrypted memory sharing* with AI agents, the codebase at this repository now forms the basis for the transition to a **cloud-based, privacy-centric journaling and context-sharing platform**.
+
+### 🔐 Inspiration: Secure AI Memory Sharing
+
+Drawing from the architectural design (`download.html`, `thread-downloader.html`) and local-first ethos:
+
+- **Short-term AI memory (ephemeral storage)** is now supported online with browser-based encryption.  
+- User notes, prompt experiments, or session context can be shared *temporarily* between devices or AI agents.
+- **Everything is encrypted client-side:** The server only relays encrypted blobs; all secrets/keys stay with the user.
+- Optional *"erase on unfocus"* or *timer-based* destruction enhances privacy, inspired by the original download-and-forget model.
+
+### 🚀 How It Works:  
+- Use the online journaling tool at [yourl.cloud] for 3-minute, privacy-preserving writing sessions.
+- Each session encrypts content in-browser before any upload or sharing; only those with the session key can decrypt.
+- Data is auto-erased after session expiry or tab unfocus unless *explicitly* shared or saved by the user.
+- No permanent log or server-side learning—preserving the spirit of ephemeral, user-controlled offline tools.
+
+### 📁 Project Structure Enhancements
+
+The core files (`download.html`, `thread-downloader.html`) now serve as templates for:
+- Browser-based encryption/decryption utilities
+- Secure, short-lived session sharing between users/agents
+- Transparent, open-source logic so users can verify privacy guarantees
+
+### 🤝 Contributing to the Future
+
+We welcome PRs that:
+- Refactor utilities for better cryptographic hygiene
+- Extend the API for additional cipher support or federated AI agent memory integrations
+- Improve in-browser UX for secure journaling or ephemeral context exchange
+
+**Note:**  
+This project is dedicated to maintaining the highest standards for user privacy—both on disk and in the cloud. All encryption logic is open-source and auditable, and no plaintext user data is ever stored server-side by default.
+
 ## 🌐 Trust Mesh Network
 
 ### CA NONPROFIT Trust Architecture
