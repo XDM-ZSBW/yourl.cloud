@@ -83,10 +83,13 @@ images:
 # Timeout for the entire build process
 timeout: '1800s'
 
-# Substitutions for variables
-substitutions:
-  _NOTIFICATION_EMAIL: 'bcherrman@gmail.com'
-  _REGION: 'us-west1'  # Changed to match reference
+# Build options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+    - 'NOTIFICATION_EMAIL=bcherrman@gmail.com'
+    - 'DEPLOY_REGION=us-west1'
 
 # Tags for build identification
 tags:
