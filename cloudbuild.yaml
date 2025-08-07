@@ -89,9 +89,8 @@ steps:
       - '-c'
       - |
         # Get current marketing codes
-        CODES=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current)
-        CURRENT_CODE=$(echo "$CODES" | grep "Current public code" | cut -d: -f2 | tr -d ' ')
-        NEXT_CODE=$(echo "$CODES" | grep "Next public code" | cut -d: -f2 | tr -d ' ')
+        export CURRENT_CODE=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current | grep "Current public code" | cut -d: -f2 | tr -d ' ')
+        export NEXT_CODE=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current | grep "Next public code" | cut -d: -f2 | tr -d ' ')
         
         echo "Sending notification to $NOTIFICATION_EMAIL"
         gcloud functions call sendBuildNotification \
@@ -114,9 +113,8 @@ steps:
       - '-c'
       - |
         # Get current marketing codes
-        CODES=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current)
-        CURRENT_CODE=$(echo "$CODES" | grep "Current public code" | cut -d: -f2 | tr -d ' ')
-        NEXT_CODE=$(echo "$CODES" | grep "Next public code" | cut -d: -f2 | tr -d ' ')
+        export CURRENT_CODE=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current | grep "Current public code" | cut -d: -f2 | tr -d ' ')
+        export NEXT_CODE=$(python scripts/marketing_code.py --project $PROJECT_ID --action get-current | grep "Next public code" | cut -d: -f2 | tr -d ' ')
         
         curl -X POST \
           -H "Authorization: token $$GITHUB_TOKEN" \
