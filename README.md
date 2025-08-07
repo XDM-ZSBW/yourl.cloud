@@ -38,7 +38,7 @@ A self-executing Python Flask application that responds with the request URL and
 
 ```bash
 # All instances use Gunicorn WSGI server
-gunicorn --config gunicorn.conf.py wsgi:app
+gunicorn --config scripts/gunicorn.conf.py wsgi:app
 
 # Or using the startup script
 python start.py
@@ -86,7 +86,7 @@ gcloud run domain-mappings create \
 - ✅ **HTTPS Support**: Automatic HTTPS detection and protocol handling
 - ✅ **Proxy Trust**: Configured to trust Cloud Run's proxy headers
 
-For detailed domain mapping instructions, see [CLOUD_RUN_DOMAIN_MAPPING.md](CLOUD_RUN_DOMAIN_MAPPING.md).
+For detailed domain mapping instructions, see [CLOUD_RUN_DOMAIN_MAPPING.md](wiki/CLOUD_RUN_DOMAIN_MAPPING.md).
 
 ## 🔄 How it works
 
@@ -107,19 +107,33 @@ For detailed domain mapping instructions, see [CLOUD_RUN_DOMAIN_MAPPING.md](CLOU
 
 ```
 yourl.cloud/
-├── app.py              # Main Flask application with visual inspection and Cloud Run support
-├── wsgi.py             # WSGI entry point for production deployment (domain mapping compatible)
-├── gunicorn.conf.py    # Gunicorn configuration for production
+├── app.py              # Main Flask application with visual inspection
+├── wsgi.py             # WSGI entry point for production deployment
 ├── start.py            # Startup script with auto-detection
-├── requirements.txt    # Python dependencies (includes Gunicorn)
-├── Dockerfile         # Docker configuration for Cloud Run (uses Gunicorn)
-├── cloudbuild.yaml    # Google Cloud Build configuration
+├── requirements.txt    # Python dependencies
+├── README.md          # Project documentation
+├── cloudbuild.yaml    # Cloud Build configuration
 ├── .dockerignore      # Docker ignore rules
+├── Dockerfile         # Docker configuration for Cloud Run
+├── config/            # Configuration files
+│   ├── nginx.conf     # Nginx configuration
+│   └── docker-compose.yml  # Docker Compose configuration
+├── scripts/           # Utility scripts
+│   ├── gunicorn.conf.py    # Gunicorn configuration
+│   ├── auto_update.py      # Documentation automation
+│   ├── update_wiki.py      # Wiki updates
+│   ├── update_readme.py    # README updates
+│   ├── deploy.sh           # Unix deployment
+│   ├── deploy.bat          # Windows deployment
+│   ├── restart.cmd         # Windows restart
+│   └── restart.ps1         # PowerShell restart
 ├── templates/         # HTML templates
 │   └── index.html     # Landing page template
-├── README.md          # This file
-├── CLOUD_RUN_DOMAIN_MAPPING.md  # Comprehensive domain mapping guide
-└── .git/              # Version control
+├── wiki/             # Documentation files
+│   ├── Home.md       # Wiki home page
+│   ├── SECURITY.md   # Security policy
+│   └── *.md          # Other documentation
+└── .git/             # Version control
 ```
 
 ## 🛠️ API Endpoints

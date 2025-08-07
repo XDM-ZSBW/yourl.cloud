@@ -54,7 +54,7 @@ def start_production():
         print("🐧 Unix-like system detected - using Gunicorn WSGI server")
         cmd = [
             "gunicorn",
-            "--config", "gunicorn.conf.py",
+            "--config", "scripts/gunicorn.conf.py",
             "wsgi:app"
         ]
         

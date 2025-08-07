@@ -101,14 +101,14 @@ def main():
     is_post_commit = len(sys.argv) > 1 and sys.argv[1] == "--post-commit"
     
     # Update README.md (linear progression)
-    readme_success = run_script("update_readme.py", "Updating README.md (linear progression)")
+    readme_success = run_script("scripts/update_readme.py", "Updating README.md (linear progression)")
     
     # Update wiki (past/present/future context) - only if not in post-commit mode
     if is_post_commit:
         print("Skipping wiki update in post-commit mode to avoid sync issues")
         wiki_success = True
     else:
-        wiki_success = run_script("update_wiki.py", "Updating wiki (past/present/future context)")
+        wiki_success = run_script("scripts/update_wiki.py", "Updating wiki (past/present/future context)")
     
     # Summary
     print("\n" + "="*60)
