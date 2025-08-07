@@ -7,9 +7,6 @@ Flask==3.0.2
 # WSGI server - latest secure version  
 Werkzeug==3.0.1
 
-# Production WSGI server - latest secure version
-gunicorn==21.2.0
-
 # Additional security packages (optional but recommended)
 # Uncomment if needed for your deployment
 # cryptography==42.0.5  # For additional encryption support

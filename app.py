@@ -99,406 +99,322 @@ def detect_device_type(user_agent):
         return 'phone'
     
     # Tablet detection
-    if any(keyword in ua_lower for keyword in ['tablet', 'ipad', 'kindle']):
+    if any(keyword in ua_lower for keyword in ['tablet', 'ipad', 'android']):
         return 'tablet'
     
-    # PC detection (default for desktop browsers)
-    if any(keyword in ua_lower for keyword in ['windows', 'macintosh', 'linux', 'x11', 'desktop']):
-        return 'pc'
-    
-    return 'unknown'
+    # Default to PC
+    return 'pc'
 
 def is_visual_inspection_allowed(device_type):
     """
-    Check if visual inspection is allowed for the device type.
+    Check if visual inspection is allowed for the given device type.
     """
     if not FRIENDS_FAMILY_GUARD["enabled"]:
         return True
     
-    rules = FRIENDS_FAMILY_GUARD["visual_inspection"]
-    
-    if device_type == 'watch':
-        return not rules["watch_blocked"]
-    elif device_type == 'pc':
-        return rules["pc_allowed"]
-    elif device_type == 'phone':
-        return rules["phone_allowed"]
-    elif device_type == 'tablet':
-        return rules["tablet_allowed"]
-    
-    return False
+    return FRIENDS_FAMILY_GUARD["visual_inspection"].get(f"{device_type}_allowed", False)
 
 @app.route('/', methods=['GET', 'POST'])
 def main_endpoint():
     """
-    Dual-mode endpoint:
-    - GET: Shows main landing page with input box and affiliate links
-    - POST: Checks password and returns connections list or thanks page
+    Main endpoint that handles both GET (landing page) and POST (authentication).
     """
-    try:
-        if request.method == 'GET':
-            # Return the main landing page
-            return render_template('index.html')
-        
-        elif request.method == 'POST':
-            # Handle password authentication
-            password = request.form.get('password', '')
-            
-            if password == DEMO_CONFIG['password']:
-                # Correct password - return connections list in JSON
-                logger.info(f"Successful authentication from {request.remote_addr}")
-                return jsonify({
-                    "status": "success",
-                    "message": "Authentication successful",
-                    "connections": DEMO_CONFIG['connections'],
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "session_id": FRIENDS_FAMILY_GUARD["session_id"],
-                    "organization": FRIENDS_FAMILY_GUARD["organization"]
-                })
-            else:
-                # Incorrect password - return thanks page
-                logger.warning(f"Failed authentication attempt from {request.remote_addr}")
-                return render_template_string("""
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Thank You - Yourl.Cloud</title>
-                    <style>
-                        body {
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            min-height: 100vh;
-                            color: white;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            text-align: center;
-                        }
-                        .container {
-                            background: rgba(255, 255, 255, 0.1);
-                            border-radius: 20px;
-                            backdrop-filter: blur(10px);
-                            padding: 3rem;
-                            max-width: 500px;
-                        }
-                        h1 { margin-bottom: 1rem; }
-                        p { opacity: 0.9; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>🙏 Thank You</h1>
-                        <p>Thank you for your interest in Yourl.Cloud!</p>
-                        <p>Please check back later for updates.</p>
+    if request.method == 'GET':
+        # Return the landing page
+        return render_template('index.html') if os.path.exists('templates/index.html') else """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Yourl.Cloud - URL API Server</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                h1 { color: #333; text-align: center; }
+                .form-group { margin: 20px 0; }
+                label { display: block; margin-bottom: 5px; font-weight: bold; }
+                input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+                button { background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+                button:hover { background: #0056b3; }
+                .info { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🚀 Yourl.Cloud</h1>
+                <div class="info">
+                    <strong>URL API Server with Visual Inspection</strong><br>
+                    Production-ready Flask application with security features.
+                </div>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="password">Demo Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter demo password" required>
                     </div>
-                </body>
-                </html>
-                """)
-        
-        # Default return for unsupported methods
-        return jsonify({"error": "Method not allowed"}), 405
+                    <button type="submit">Access API</button>
+                </form>
+                <div class="info">
+                    <strong>Demo Password:</strong> yourl2024<br>
+                    <strong>Health Check:</strong> <a href="/health">/health</a><br>
+                    <strong>Status:</strong> <a href="/status">/status</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
     
-    except Exception as e:
-        logger.error(f"Error in main endpoint: {str(e)}")
-        return jsonify({
-            "error": "Internal server error",
-            "message": "An error occurred processing your request",
-            "timestamp": datetime.utcnow().isoformat()
-        }), 500
+    elif request.method == 'POST':
+        # Handle authentication
+        password = request.form.get('password', '')
+        
+        if password == DEMO_CONFIG["password"]:
+            return jsonify({
+                "status": "authenticated",
+                "message": "Welcome to Yourl.Cloud API",
+                "connections": DEMO_CONFIG["connections"],
+                "timestamp": datetime.utcnow().isoformat(),
+                "organization": FRIENDS_FAMILY_GUARD["organization"]
+            })
+        else:
+            return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Access Denied - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; text-align: center; }
+                    .container { max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    h1 { color: #d32f2f; }
+                    .btn { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>❌ Access Denied</h1>
+                    <p>Invalid password. Please try again.</p>
+                    <a href="/" class="btn">Go Back</a>
+                </div>
+            </body>
+            </html>
+            """
+    
+    else:
+        return jsonify({"error": "Method not allowed"}), 405
 
 @app.route('/api', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 def get_request_url():
     """
     API endpoint that returns the request URL and metadata.
-    Supports visual inspection for allowed devices.
     """
-    try:
-        # Get the full request URL
-        url = request.url
-        base_url = request.base_url
-        full_path = request.full_path
-        
-        # Get request metadata
-        method = request.method
-        headers = dict(request.headers)
-        remote_addr = request.remote_addr
-        user_agent = request.headers.get('User-Agent', 'Unknown')
-        
-        # Detect device type
-        device_type = detect_device_type(user_agent)
-        visual_allowed = is_visual_inspection_allowed(device_type)
-        
-        # Get server info
-        hostname = socket.gethostname()
-        timestamp = datetime.utcnow().isoformat()
-        
-        # Check if client wants HTML response
-        accepts_html = 'text/html' in request.headers.get('Accept', '')
-        
-        if accepts_html and visual_allowed:
-            return render_visual_inspection(url, device_type, timestamp)
-        
-        # Prepare JSON response
-        response_data = {
-            "url": url,
-            "base_url": base_url,
-            "full_path": full_path,
-            "method": method,
-            "remote_addr": remote_addr,
-            "user_agent": user_agent,
-            "device_type": device_type,
-            "visual_inspection_allowed": visual_allowed,
-            "hostname": hostname,
-            "timestamp": timestamp,
-            "headers": headers,
-            "session_id": FRIENDS_FAMILY_GUARD["session_id"],
-            "organization": FRIENDS_FAMILY_GUARD["organization"],
-            "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"]
-        }
-        
-        return jsonify(response_data)
+    # Get request information
+    url = request.url
+    method = request.method
+    headers = dict(request.headers)
+    user_agent = headers.get('User-Agent', 'Unknown')
+    device_type = detect_device_type(user_agent)
     
-    except Exception as e:
-        logger.error(f"Error in API endpoint: {str(e)}")
+    # Check if visual inspection is allowed
+    if is_visual_inspection_allowed(device_type):
+        # Return HTML for allowed devices
+        return render_visual_inspection(url, device_type, datetime.utcnow())
+    else:
+        # Return JSON for blocked devices (like watches)
         return jsonify({
-            "error": "Internal server error",
-            "message": "An error occurred processing your request",
-            "timestamp": datetime.utcnow().isoformat()
-        }), 500
+            "url": url,
+            "method": method,
+            "device_type": device_type,
+            "visual_inspection": "blocked",
+            "timestamp": datetime.utcnow().isoformat(),
+            "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
+            "organization": FRIENDS_FAMILY_GUARD["organization"]
+        })
 
 def render_visual_inspection(url, device_type, timestamp):
     """
-    Render visual inspection interface for allowed devices.
+    Render the visual inspection interface for allowed devices.
     """
-    html_template = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Inspection - URL API</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: white;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .inspection-panel {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .url-display {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 1.1rem;
-        }
-        
-        .metadata-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .metadata-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 1rem;
-        }
-        
-        .metadata-item h3 {
-            margin-bottom: 0.5rem;
-            color: #ffd700;
-        }
-        
-        .device-badge {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
-        
-        .device-pc { background: #4CAF50; }
-        .device-phone { background: #2196F3; }
-        .device-tablet { background: #FF9800; }
-        .device-watch { background: #F44336; }
-        
-        .guard-status {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .guard-status h3 {
-            color: #ffd700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 0.5rem;
-        }
-        
-        .status-active { background: #4CAF50; }
-        .status-inactive { background: #F44336; }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Yourl.Cloud - Visual Inspection</title>
+        <style>
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: #333;
+            }}
+            .container {{
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                overflow: hidden;
+            }}
+            .header {{
+                background: linear-gradient(135deg, #007bff, #0056b3);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }}
+            .header h1 {{
+                margin: 0;
+                font-size: 2.5em;
+                font-weight: 300;
+            }}
+            .content {{
+                padding: 30px;
+            }}
+            .url-display {{
+                background: #f8f9fa;
+                border: 2px solid #e9ecef;
+                border-radius: 10px;
+                padding: 20px;
+                margin: 20px 0;
+                word-break: break-all;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+            }}
+            .info-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin: 30px 0;
+            }}
+            .info-card {{
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 20px;
+                border-left: 4px solid #007bff;
+            }}
+            .info-card h3 {{
+                margin: 0 0 10px 0;
+                color: #007bff;
+            }}
+            .status-badge {{
+                display: inline-block;
+                padding: 5px 15px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: uppercase;
+            }}
+            .status-success {{
+                background: #d4edda;
+                color: #155724;
+            }}
+            .status-info {{
+                background: #d1ecf1;
+                color: #0c5460;
+            }}
+            .refresh-btn {{
+                background: linear-gradient(135deg, #007bff, #0056b3);
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: transform 0.2s;
+            }}
+            .refresh-btn:hover {{
+                transform: translateY(-2px);
+            }}
+            .footer {{
+                background: #f8f9fa;
+                padding: 20px;
+                text-align: center;
+                border-top: 1px solid #e9ecef;
+            }}
+            @media (max-width: 768px) {{
+                .container {{
+                    margin: 10px;
+                    border-radius: 10px;
+                }}
+                .header h1 {{
+                    font-size: 2em;
+                }}
+                .content {{
+                    padding: 20px;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔍 Visual Inspection</h1>
+                <p>Yourl.Cloud URL API Server - Real-time Monitoring</p>
+            </div>
             
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .metadata-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .refresh-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
-        }
-        
-        .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔍 Visual Inspection</h1>
-            <p>URL API Server - Friends and Family Guard Enabled</p>
-        </div>
-        
-        <div class="inspection-panel">
-            <h2>Request URL</h2>
-            <div class="url-display">{{ url }}</div>
-            
-            <div class="metadata-grid">
-                <div class="metadata-item">
-                    <h3>Device Type</h3>
-                    <span class="device-badge device-{{ device_type }}">{{ device_type.upper() }}</span>
+            <div class="content">
+                <div class="url-display">
+                    <strong>Request URL:</strong><br>
+                    {url}
                 </div>
                 
-                <div class="metadata-item">
-                    <h3>Timestamp</h3>
-                    <p>{{ timestamp }}</p>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>📱 Device Information</h3>
+                        <p><strong>Type:</strong> {device_type.title()}</p>
+                        <p><strong>Status:</strong> <span class="status-badge status-success">Allowed</span></p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🛡️ Security Status</h3>
+                        <p><strong>Guard:</strong> <span class="status-badge status-success">Enabled</span></p>
+                        <p><strong>Inspection:</strong> <span class="status-badge status-info">Active</span></p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>⏰ Timestamp</h3>
+                        <p><strong>Time:</strong> {timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+                        <p><strong>Session:</strong> {FRIENDS_FAMILY_GUARD['session_id'][:8]}...</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🏢 Organization</h3>
+                        <p><strong>Company:</strong> {FRIENDS_FAMILY_GUARD['organization']}</p>
+                        <p><strong>Environment:</strong> <span class="status-badge status-success">Production</span></p>
+                    </div>
                 </div>
                 
-                <div class="metadata-item">
-                    <h3>Session ID</h3>
-                    <p>{{ session_id }}</p>
-                </div>
-                
-                <div class="metadata-item">
-                    <h3>Organization</h3>
-                    <p>{{ organization }}</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <button class="refresh-btn" onclick="location.reload()">
+                        🔄 Refresh Data
+                    </button>
                 </div>
             </div>
             
-            <div class="guard-status">
-                <h3>Friends and Family Guard Status</h3>
-                <p>
-                    <span class="status-indicator status-active"></span>
-                    Visual inspection allowed for {{ device_type }} devices
-                </p>
-                <p>Watch devices are blocked for visual inspection per security rules.</p>
+            <div class="footer">
+                <p><strong>Yourl.Cloud</strong> - Secure URL API Server with Visual Inspection</p>
+                <p>Session: {FRIENDS_FAMILY_GUARD['session_id']} | Organization: {FRIENDS_FAMILY_GUARD['organization']}</p>
             </div>
-            
-            <button class="refresh-btn" onclick="location.reload()">
-                🔄 Refresh Inspection
-            </button>
         </div>
-    </div>
-    
-    <script>
-        // Auto-refresh every 30 seconds for real-time inspection
-        setTimeout(() => {
-            location.reload();
-        }, 30000);
         
-        // Add keyboard shortcut for refresh (Ctrl+R or Cmd+R)
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-                e.preventDefault();
+        <script>
+            // Auto-refresh every 30 seconds
+            setTimeout(function() {{
                 location.reload();
-            }
-        });
-    </script>
-</body>
-</html>
+            }}, 30000);
+        </script>
+    </body>
+    </html>
     """
-    
-    return render_template_string(html_template, 
-                                url=url,
-                                device_type=device_type,
-                                timestamp=timestamp,
-                                session_id=FRIENDS_FAMILY_GUARD["session_id"],
-                                organization=FRIENDS_FAMILY_GUARD["organization"])
+    return html_content
 
 @app.route('/health', methods=['GET'])
 def health_check():
     """
-    Health check endpoint for monitoring.
+    Health check endpoint for Cloud Run.
     """
     return jsonify({
         "status": "healthy",
@@ -507,7 +423,7 @@ def health_check():
         "version": "1.0.0",
         "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
         "cloud_run_support": True,
-        "wsgi_server": "gunicorn",
+        "wsgi_server": "flask",
         "production_mode": True,
         "deployment_model": "all_instances_production",
         "port": PORT
@@ -531,7 +447,7 @@ def status():
         "visual_inspection": FRIENDS_FAMILY_GUARD["visual_inspection"],
         "cloud_run_support": True,
         "demo_mode": True,
-        "wsgi_server": "gunicorn",
+        "wsgi_server": "flask",
         "production_mode": True,
         "deployment_model": "all_instances_production"
     })
@@ -589,9 +505,7 @@ if __name__ == '__main__':
     print("=" * 60)
     
     # Run the application - All instances are production instances
-    print("🚀 Running in Production Mode (using Gunicorn)")
-    # In production, Gunicorn will handle the WSGI server
-    # This block is mainly for development/testing
+    print("🚀 Running in Production Mode (using Flask)")
     app.run(
         host=HOST,
         port=PORT,
