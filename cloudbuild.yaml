@@ -1,3 +1,10 @@
+# Service account to use for builds
+serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/automation-sa-yourl@$PROJECT_ID.iam.gserviceaccount.com'
+options:
+  logging: CLOUD_LOGGING_ONLY
+  env:
+    - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+    
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
@@ -19,19 +26,15 @@ steps:
       - 'yourl-cloud'
       - '--image'
       - 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA'
+      - '--service-account'
+      - 'automation-sa-yourl@$PROJECT_ID.iam.gserviceaccount.com'
       - '--region'
-      - 'us-central1'
+      - 'us-west1'  # Changed to match reference
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
-      - '--memory'
-      - '512Mi'
-      - '--cpu'
-      - '1'
-      - '--max-instances'
-      - '10'
 
   # Send email notification
   - name: 'gcr.io/cloud-builders/curl'
@@ -83,7 +86,7 @@ timeout: '1800s'
 # Substitutions for variables
 substitutions:
   _NOTIFICATION_EMAIL: 'bcherrman@gmail.com'
-  _REGION: 'us-central1'
+  _REGION: 'us-west1'  # Changed to match reference
 
 # Tags for build identification
 tags:
