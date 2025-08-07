@@ -2,7 +2,9 @@
 
 **Simple Python Flask API that returns the request URL with visual inspection capabilities and Google Cloud Run deployment**
 
-A self-executing Python Flask application that responds with the request URL and metadata, featuring visual inspection capabilities for PC and phone devices while following Friends and Family Guard ruleset settings. Enhanced for Google Cloud Run deployment with dual-mode endpoint support.
+A self-executing Python Flask application that responds with the request URL and metadata, featuring visual inspection capabilities for PC and phone devices while following Friends and Family Guard ruleset settings. Enhanced for Google Cloud Run deployment with dual-mode endpoint support and production-ready WSGI server.
+
+**All instances deploy as production instances** - the tester decides whether they're using it for personal or work purposes.
 
 ## 🚀 Quick Start
 
@@ -19,12 +21,28 @@ A self-executing Python Flask application that responds with the request URL and
    pip install -r requirements.txt
    ```
 
-3. **Run the application**:
+3. **Run the application** (All instances are production instances):
    ```bash
+   # Using the startup script (recommended)
+   python start.py
+   
+   # Or direct execution
    python app.py
    ```
 
 4. **Access the API**: http://localhost:8080
+
+### Production Deployment
+
+**All instances deploy as production instances** - the tester decides the usage context:
+
+```bash
+# All instances use Gunicorn WSGI server
+gunicorn --config gunicorn.conf.py wsgi:app
+
+# Or using the startup script
+python start.py
+```
 
 ### Google Cloud Run Deployment
 
@@ -56,6 +74,8 @@ A self-executing Python Flask application that responds with the request URL and
 * **Friends and Family Guard** ruleset compliance
 * **Watch devices blocked** for visual inspection per security rules
 * **Demo authentication** with hardcoded password for rapid prototyping
+* **Production WSGI server**: Gunicorn for all deployments
+* **All instances are production instances**: Tester decides personal vs work usage
 * Includes health check and status endpoints
 * Runs on port 8080 for Cloud Run compatibility
 
@@ -64,8 +84,11 @@ A self-executing Python Flask application that responds with the request URL and
 ```
 yourl.cloud/
 ├── app.py              # Main Flask application with visual inspection and Cloud Run support
-├── requirements.txt    # Python dependencies
-├── Dockerfile         # Docker configuration for Cloud Run
+├── wsgi.py             # WSGI entry point for production deployment
+├── gunicorn.conf.py    # Gunicorn configuration for production
+├── start.py            # Startup script with auto-detection
+├── requirements.txt    # Python dependencies (includes Gunicorn)
+├── Dockerfile         # Docker configuration for Cloud Run (uses Gunicorn)
 ├── cloudbuild.yaml    # Google Cloud Build configuration
 ├── .dockerignore      # Docker ignore rules
 ├── templates/         # HTML templates

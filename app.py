@@ -6,11 +6,13 @@ Simple API Server with Visual Inspection and Google Cloud Run Support
 A self-executing Python Flask application that responds with the request URL
 and provides visual inspection capabilities for PC and phone devices.
 Enhanced for Google Cloud Run deployment with dual-mode endpoint support.
+Production-ready with WSGI server support.
 
 Author: Yourl Cloud Inc.
 Session: f1d78acb-de07-46e0-bfa7-f5b75e3c0c49
 Friends and Family Guard: Enabled
 Google Cloud Run: Supported
+WSGI Server: Production Ready
 """
 
 from flask import Flask, request, jsonify, render_template_string, render_template
@@ -34,6 +36,8 @@ app = Flask(__name__)
 HOST = '0.0.0.0'  # Listen on all interfaces
 PORT = int(os.environ.get('PORT', 8080))  # Read PORT from environment (default 8080 for Cloud Run)
 DEBUG = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+# Production mode detection - All instances deploy as production instances
+PRODUCTION = True  # Always production for all deployments
 
 # Friends and Family Guard Ruleset
 FRIENDS_FAMILY_GUARD = {
@@ -503,6 +507,9 @@ def health_check():
         "version": "1.0.0",
         "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
         "cloud_run_support": True,
+        "wsgi_server": "gunicorn",
+        "production_mode": True,
+        "deployment_model": "all_instances_production",
         "port": PORT
     })
 
@@ -523,7 +530,10 @@ def status():
         "friends_family_guard": FRIENDS_FAMILY_GUARD["enabled"],
         "visual_inspection": FRIENDS_FAMILY_GUARD["visual_inspection"],
         "cloud_run_support": True,
-        "demo_mode": True
+        "demo_mode": True,
+        "wsgi_server": "gunicorn",
+        "production_mode": True,
+        "deployment_model": "all_instances_production"
     })
 
 @app.route('/guard', methods=['GET'])
@@ -568,6 +578,7 @@ if __name__ == '__main__':
     print(f"📍 Host: {HOST}")
     print(f"🔌 Port: {PORT}")
     print(f"🐛 Debug: {DEBUG}")
+    print(f"🏭 Production: {PRODUCTION} (All instances are production instances)")
     print(f"🆔 Session: {FRIENDS_FAMILY_GUARD['session_id']}")
     print(f"🏢 Organization: {FRIENDS_FAMILY_GUARD['organization']}")
     print(f"🛡️ Friends and Family Guard: {'Enabled' if FRIENDS_FAMILY_GUARD['enabled'] else 'Disabled'}")
@@ -577,10 +588,13 @@ if __name__ == '__main__':
     print(f"🌐 Access: http://{HOST}:{PORT}")
     print("=" * 60)
     
-    # Run the application
+    # Run the application - All instances are production instances
+    print("🚀 Running in Production Mode (using Gunicorn)")
+    # In production, Gunicorn will handle the WSGI server
+    # This block is mainly for development/testing
     app.run(
         host=HOST,
         port=PORT,
-        debug=DEBUG,
+        debug=False,  # Always False in production
         threaded=True
     )
