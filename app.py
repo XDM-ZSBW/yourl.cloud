@@ -521,7 +521,9 @@ def main_endpoint():
                 "ownership": {
                     "perplexity": "current_marketing_password",
                     "cursor": "next_marketing_password"
-                }
+                },
+                "landing_page_url": "/",
+                "back_to_landing": "🔗 Click here to return to the landing page"
             })
             
             # Set visitor cookie if not already set
