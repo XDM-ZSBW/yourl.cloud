@@ -9,7 +9,6 @@ options:
 
 # Substitutions
 substitutions:
-  _NOTIFICATION_EMAIL: 'bcherrman@gmail.com'
   _DEPLOY_REGION: 'us-west1'
 
 steps:
