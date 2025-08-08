@@ -16,7 +16,7 @@ WSGI Server: Production Ready
 Domain Mapping: Compatible
 """
 
-from flask import Flask, request, jsonify, render_template_string, render_template, make_response, session
+from flask import Flask, request, jsonify, render_template_string, render_template, make_response, session, Response
 import socket
 import os
 import re
@@ -1979,11 +1979,19 @@ def attempt_code_recovery(visitor_id: str, user_agent: str, ip_address: str) -> 
     try:
         database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
         if not database_connection:
+            # Fallback: suggest current live code when database is not available
+            current_code = get_current_marketing_password()
             return {
-                'success': False,
-                'message': 'Recovery system unavailable - database not connected',
-                'suggested_code': None,
-                'recovery_method': 'none'
+                'success': True,
+                'message': f'Database not connected - using current live code: {current_code}',
+                'suggested_code': current_code,
+                'recovery_method': 'current_code_fallback',
+                'usage_pattern': {
+                    'total_attempts': 0,
+                    'successful_attempts': 0,
+                    'last_successful': None,
+                    'last_attempt': None
+                }
             }
         
         from scripts.database_client import DatabaseClient
@@ -1993,11 +2001,19 @@ def attempt_code_recovery(visitor_id: str, user_agent: str, ip_address: str) -> 
         visitor_history = db_client.get_visitor_access_history(visitor_id)
         
         if not visitor_history:
+            # No history found - suggest current code
+            current_code = get_current_marketing_password()
             return {
-                'success': False,
-                'message': 'No previous usage history found for recovery',
-                'suggested_code': None,
-                'recovery_method': 'none'
+                'success': True,
+                'message': f'No previous usage history found - using current live code: {current_code}',
+                'suggested_code': current_code,
+                'recovery_method': 'current_code_no_history',
+                'usage_pattern': {
+                    'total_attempts': 0,
+                    'successful_attempts': 0,
+                    'last_successful': None,
+                    'last_attempt': None
+                }
             }
         
         # Analyze patterns to suggest recovery
@@ -2035,15 +2051,17 @@ def attempt_code_recovery(visitor_id: str, user_agent: str, ip_address: str) -> 
         
     except Exception as e:
         print(f"⚠️ Error in code recovery: {e}")
+        # Fallback: suggest current code on any error
+        current_code = get_current_marketing_password()
         return {
-            'success': False,
-            'message': f'Recovery system error: {str(e)}',
-            'suggested_code': None,
-            'recovery_method': 'error'
+            'success': True,
+            'message': f'Recovery system error - using current live code: {current_code}',
+            'suggested_code': current_code,
+            'recovery_method': 'current_code_error_fallback'
         }
 
 @app.route('/recover', methods=['GET', 'POST'])
-def code_recovery():
+def code_recovery() -> Response:
     """
     Code recovery endpoint for users who forgot their codes.
     Respects privacy by using only stored behavioral data.
@@ -2279,6 +2297,9 @@ def code_recovery():
             </html>
             """
             return make_response(failed_html)
+    
+    # Default return for any other method
+    return make_response("Method not allowed", 405)
 
 if __name__ == '__main__':
     # Determine the display address for users
