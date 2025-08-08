@@ -38,6 +38,20 @@ class DatabaseClient:
         
         try:
             with conn.cursor() as cursor:
+                # Current and next marketing codes table (primary storage)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS marketing_codes (
+                        id SERIAL PRIMARY KEY,
+                        code_type VARCHAR(20) UNIQUE NOT NULL, -- 'current', 'next'
+                        code VARCHAR(50) NOT NULL,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        commit_hash VARCHAR(50),
+                        deployment_id VARCHAR(100),
+                        rotation_reason VARCHAR(200)
+                    )
+                """)
+                
                 # Marketing code history table
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS marketing_code_history (
@@ -155,29 +169,220 @@ class DatabaseClient:
         finally:
             conn.close()
     
-    def log_code_history(self, code: str, code_type: str, commit_hash: Optional[str] = None, 
-                        deployment_id: Optional[str] = None, rotation_reason: Optional[str] = None) -> bool:
-        """Log a marketing code change"""
+    # Marketing Code Management Methods
+    def get_current_marketing_code(self) -> Optional[str]:
+        """Get the current live marketing code from database"""
+        conn = self._get_connection()
+        if not conn:
+            return None
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT code FROM marketing_codes 
+                    WHERE code_type = 'current' 
+                    ORDER BY updated_at DESC 
+                    LIMIT 1
+                """)
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except Exception as e:
+            logger.error(f"Error getting current marketing code: {e}")
+            return None
+        finally:
+            conn.close()
+    
+    def get_next_marketing_code(self) -> Optional[str]:
+        """Get the next marketing code from database"""
+        conn = self._get_connection()
+        if not conn:
+            return None
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT code FROM marketing_codes 
+                    WHERE code_type = 'next' 
+                    ORDER BY updated_at DESC 
+                    LIMIT 1
+                """)
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except Exception as e:
+            logger.error(f"Error getting next marketing code: {e}")
+            return None
+        finally:
+            conn.close()
+    
+    def set_current_marketing_code(self, code: str, commit_hash: Optional[str] = None, 
+                                  deployment_id: Optional[str] = None, 
+                                  rotation_reason: Optional[str] = None) -> bool:
+        """Set the current marketing code in database"""
         conn = self._get_connection()
         if not conn:
             return False
         
         try:
             with conn.cursor() as cursor:
+                # Archive current code if it exists
+                current_code = self.get_current_marketing_code()
+                if current_code:
+                    self._archive_code(current_code, 'current')
+                
+                # Insert or update current code
                 cursor.execute("""
-                    INSERT INTO marketing_code_history 
-                    (code, code_type, commit_hash, deployment_id, rotation_reason, deployed_at)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (code, code_type, commit_hash, deployment_id, rotation_reason, datetime.now(timezone.utc)))
+                    INSERT INTO marketing_codes (code_type, code, commit_hash, deployment_id, rotation_reason, updated_at)
+                    VALUES ('current', %s, %s, %s, %s, %s)
+                    ON CONFLICT (code_type) 
+                    DO UPDATE SET 
+                        code = EXCLUDED.code,
+                        commit_hash = EXCLUDED.commit_hash,
+                        deployment_id = EXCLUDED.deployment_id,
+                        rotation_reason = EXCLUDED.rotation_reason,
+                        updated_at = EXCLUDED.updated_at
+                """, (code, commit_hash, deployment_id, rotation_reason, datetime.now(timezone.utc)))
+                
+                # Add to history
+                self._add_to_history(code, 'current', commit_hash, deployment_id, rotation_reason)
                 
                 conn.commit()
+                logger.info(f"Set current marketing code: {code}")
                 return True
         except Exception as e:
-            logger.error(f"Error logging code history: {e}")
+            logger.error(f"Error setting current marketing code: {e}")
             conn.rollback()
             return False
         finally:
             conn.close()
+    
+    def set_next_marketing_code(self, code: str, commit_hash: Optional[str] = None, 
+                               deployment_id: Optional[str] = None, 
+                               rotation_reason: Optional[str] = None) -> bool:
+        """Set the next marketing code in database"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                # Archive next code if it exists
+                next_code = self.get_next_marketing_code()
+                if next_code:
+                    self._archive_code(next_code, 'next')
+                
+                # Insert or update next code
+                cursor.execute("""
+                    INSERT INTO marketing_codes (code_type, code, commit_hash, deployment_id, rotation_reason, updated_at)
+                    VALUES ('next', %s, %s, %s, %s, %s)
+                    ON CONFLICT (code_type) 
+                    DO UPDATE SET 
+                        code = EXCLUDED.code,
+                        commit_hash = EXCLUDED.commit_hash,
+                        deployment_id = EXCLUDED.deployment_id,
+                        rotation_reason = EXCLUDED.rotation_reason,
+                        updated_at = EXCLUDED.updated_at
+                """, (code, commit_hash, deployment_id, rotation_reason, datetime.now(timezone.utc)))
+                
+                # Add to history
+                self._add_to_history(code, 'next', commit_hash, deployment_id, rotation_reason)
+                
+                conn.commit()
+                logger.info(f"Set next marketing code: {code}")
+                return True
+        except Exception as e:
+            logger.error(f"Error setting next marketing code: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def rotate_codes(self, new_current_code: str, new_next_code: str, 
+                    commit_hash: Optional[str] = None, deployment_id: Optional[str] = None) -> bool:
+        """Rotate codes: current becomes archived, next becomes current, new next is set"""
+        try:
+            # Archive current code
+            current_code = self.get_current_marketing_code()
+            if current_code:
+                self._archive_code(current_code, 'current')
+            
+            # Archive next code
+            next_code = self.get_next_marketing_code()
+            if next_code:
+                self._archive_code(next_code, 'next')
+            
+            # Set new codes
+            success1 = self.set_current_marketing_code(new_current_code, commit_hash, deployment_id, "rotation")
+            success2 = self.set_next_marketing_code(new_next_code, commit_hash, deployment_id, "rotation")
+            
+            return success1 and success2
+        except Exception as e:
+            logger.error(f"Error rotating codes: {e}")
+            return False
+    
+    def _archive_code(self, code: str, code_type: str):
+        """Archive a code in history"""
+        self._add_to_history(code, f'archived_{code_type}')
+    
+    def _add_to_history(self, code: str, code_type: str, commit_hash: Optional[str] = None, 
+                       deployment_id: Optional[str] = None, rotation_reason: Optional[str] = None):
+        """Add a code to history"""
+        conn = self._get_connection()
+        if not conn:
+            return
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO marketing_code_history 
+                    (code, code_type, commit_hash, deployment_id, rotation_reason, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (code, code_type, commit_hash, deployment_id, rotation_reason, datetime.now(timezone.utc)))
+                
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Error adding to history: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
+    
+    def get_code_metadata(self) -> Dict[str, Any]:
+        """Get metadata about the marketing codes"""
+        conn = self._get_connection()
+        if not conn:
+            return {}
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                # Get current and next codes
+                cursor.execute("""
+                    SELECT code_type, code, updated_at, commit_hash, deployment_id
+                    FROM marketing_codes 
+                    ORDER BY code_type, updated_at DESC
+                """)
+                codes = [dict(row) for row in cursor.fetchall()]
+                
+                # Get history count
+                cursor.execute("SELECT COUNT(*) as history_count FROM marketing_code_history")
+                history_result = cursor.fetchone()
+                history_count = history_result['history_count'] if history_result else 0
+                
+                return {
+                    'current_code_exists': any(c['code_type'] == 'current' for c in codes),
+                    'next_code_exists': any(c['code_type'] == 'next' for c in codes),
+                    'codes': codes,
+                    'history_count': history_count,
+                    'last_updated': max([c['updated_at'] for c in codes]) if codes else None
+                }
+        except Exception as e:
+            logger.error(f"Error getting code metadata: {e}")
+            return {}
+        finally:
+            conn.close()
+    
+    def log_code_history(self, code: str, code_type: str, commit_hash: Optional[str] = None, 
+                        deployment_id: Optional[str] = None, rotation_reason: Optional[str] = None) -> bool:
+        """Log a marketing code change"""
+        return self._add_to_history(code, code_type, commit_hash, deployment_id, rotation_reason) is not None
     
     def log_usage(self, code: str, user_agent: Optional[str] = None, ip_address: Optional[str] = None,
                   endpoint: Optional[str] = None, success: bool = True, session_id: Optional[str] = None,

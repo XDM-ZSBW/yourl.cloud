@@ -131,11 +131,34 @@ _next_code_printed = False
 
 def get_current_marketing_password():
     """
-    Get the current live marketing password from Google Secret Manager.
+    Get the current live marketing password from database.
     This should only change after successful deployment.
     """
     global _current_code_printed
     
+    try:
+        # Try database first (cost-effective)
+        database_connection_string = os.environ.get('DATABASE_CONNECTION_STRING')
+        if database_connection_string:
+            from scripts.database_client import DatabaseClient
+            db_client = DatabaseClient(database_connection_string)
+            current_code = db_client.get_current_marketing_code()
+            
+            if current_code:
+                if not _current_code_printed:
+                    print(f"✅ Using database current code: {current_code}")
+                    _current_code_printed = True
+                return current_code
+            else:
+                if not _current_code_printed:
+                    print("⚠️ No current code found in database")
+                    _current_code_printed = True
+    except Exception as e:
+        if not _current_code_printed:
+            print(f"❌ Error accessing database: {e}")
+            _current_code_printed = True
+    
+    # Fallback to Secret Manager (if database not available)
     try:
         from scripts.secret_manager_client import SecretManagerClient
         client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
@@ -173,11 +196,34 @@ def get_current_marketing_password():
 
 def get_next_marketing_password():
     """
-    Get the next marketing password from Google Secret Manager.
+    Get the next marketing password from database.
     This is what will become the current code after next deployment.
     """
     global _next_code_printed
     
+    try:
+        # Try database first (cost-effective)
+        database_connection_string = os.environ.get('DATABASE_CONNECTION_STRING')
+        if database_connection_string:
+            from scripts.database_client import DatabaseClient
+            db_client = DatabaseClient(database_connection_string)
+            next_code = db_client.get_next_marketing_code()
+            
+            if next_code:
+                if not _next_code_printed:
+                    print(f"✅ Using database next code: {next_code}")
+                    _next_code_printed = True
+                return next_code
+            else:
+                if not _next_code_printed:
+                    print("⚠️ No next code found in database")
+                    _next_code_printed = True
+    except Exception as e:
+        if not _next_code_printed:
+            print(f"❌ Error accessing database: {e}")
+            _next_code_printed = True
+    
+    # Fallback to Secret Manager (if database not available)
     try:
         from scripts.secret_manager_client import SecretManagerClient
         client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
