@@ -16,7 +16,7 @@ WSGI Server: Production Ready
 Domain Mapping: Compatible
 """
 
-from flask import Flask, request, jsonify, render_template_string, render_template, make_response
+from flask import Flask, request, jsonify, render_template_string, render_template, make_response, session
 import socket
 import os
 import re
@@ -40,6 +40,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+# Set a secret key for Flask sessions (required for session management)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'yourl-cloud-secret-key-2024')
 
 # Configuration - Google Cloud Run compatible with domain mapping support
 HOST = '0.0.0.0'  # Listen on all interfaces (required for Cloud Run)
@@ -353,6 +356,10 @@ def get_visitor_data():
             import uuid
             visitor_id = str(uuid.uuid4())
         
+        # Check for session-based authentication (for when database is not available)
+        session_authenticated = session.get('authenticated', False)
+        session_access_code = session.get('last_access_code')
+        
         # Try to get database connection
         database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
         if database_connection:
@@ -377,14 +384,14 @@ def get_visitor_data():
                     'has_used_code': visitor.get('last_access_code') is not None
                 }
         
-        # Fallback if database not available
+        # Fallback if database not available - use session data
         return {
             'visitor_id': visitor_id,
             'tracking_key': None,
-            'last_access_code': None,
+            'last_access_code': session_access_code,
             'total_visits': 1,
-            'is_new_visitor': True,
-            'has_used_code': False
+            'is_new_visitor': not session_authenticated,
+            'has_used_code': session_authenticated
         }
         
     except Exception as e:
@@ -392,10 +399,10 @@ def get_visitor_data():
         return {
             'visitor_id': request.cookies.get('visitor_id', 'unknown'),
             'tracking_key': None,
-            'last_access_code': None,
+            'last_access_code': session.get('last_access_code'),
             'total_visits': 1,
-            'is_new_visitor': True,
-            'has_used_code': False
+            'is_new_visitor': not session.get('authenticated', False),
+            'has_used_code': session.get('authenticated', False)
         }
 
 @app.route('/', methods=['GET', 'POST'])
@@ -477,6 +484,10 @@ def main_endpoint():
         current_password = get_current_marketing_password()
         
         if password == current_password:
+            # Set session-based authentication (for when database is not available)
+            session['authenticated'] = True
+            session['last_access_code'] = current_password
+            
             # Get the next code for authenticated users (Cursor ownership)
             next_password = get_next_marketing_password()
             
@@ -900,6 +911,10 @@ def main_endpoint():
             
             return response
         else:
+            # Clear session-based authentication on failed attempt
+            session.pop('authenticated', None)
+            session.pop('last_access_code', None)
+            
             # Log failed authentication attempt to database if available
             try:
                 database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
