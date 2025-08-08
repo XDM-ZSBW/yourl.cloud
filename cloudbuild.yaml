@@ -105,23 +105,8 @@ steps:
             }
           }'
 
-  # Update GitHub status
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'github-status'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        curl -X POST \
-          -H "Authorization: token $GITHUB_TOKEN" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/statuses/$COMMIT_SHA \
-          -d '{
-            "state": "success",
-            "target_url": "https://console.cloud.google.com/cloud-build/builds;region=global/'$BUILD_ID'?project='$PROJECT_ID'",
-            "description": "Deployment successful",
-            "context": "yourl-cloud/deployment"
-          }'
+  # Note: GitHub status updates require GITHUB_TOKEN environment variable
+  # which is not available as a built-in substitution
 
 images:
   - 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA'
