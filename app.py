@@ -1971,6 +1971,315 @@ def start_production_server():
                 print("🔄 Falling back to Flask development server...")
                 app.run(host=HOST, port=PORT, debug=False, threaded=True)
 
+def attempt_code_recovery(visitor_id: str, user_agent: str, ip_address: str) -> dict:
+    """
+    Attempt to recover user experience based on their usage patterns.
+    This respects privacy by using only stored behavioral data.
+    """
+    try:
+        database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
+        if not database_connection:
+            return {
+                'success': False,
+                'message': 'Recovery system unavailable - database not connected',
+                'suggested_code': None,
+                'recovery_method': 'none'
+            }
+        
+        from scripts.database_client import DatabaseClient
+        db_client = DatabaseClient(database_connection)
+        
+        # Get visitor's access history
+        visitor_history = db_client.get_visitor_access_history(visitor_id)
+        
+        if not visitor_history:
+            return {
+                'success': False,
+                'message': 'No previous usage history found for recovery',
+                'suggested_code': None,
+                'recovery_method': 'none'
+            }
+        
+        # Analyze patterns to suggest recovery
+        successful_codes = [h['access_code'] for h in visitor_history if h.get('success')]
+        recent_codes = [h['access_code'] for h in visitor_history[-5:]]  # Last 5 attempts
+        
+        if successful_codes:
+            # User has successfully used codes before - suggest the most recent successful one
+            suggested_code = successful_codes[-1]
+            recovery_method = 'previous_success'
+            message = f"Based on your previous successful usage, try: {suggested_code}"
+        elif recent_codes:
+            # User has attempted codes recently - suggest the most recent attempt
+            suggested_code = recent_codes[-1]
+            recovery_method = 'recent_attempt'
+            message = f"Based on your recent activity, you may have tried: {suggested_code}"
+        else:
+            # No clear pattern - suggest current code
+            suggested_code = get_current_marketing_password()
+            recovery_method = 'current_code'
+            message = f"Using current live code: {suggested_code}"
+        
+        return {
+            'success': True,
+            'message': message,
+            'suggested_code': suggested_code,
+            'recovery_method': recovery_method,
+            'usage_pattern': {
+                'total_attempts': len(visitor_history),
+                'successful_attempts': len(successful_codes),
+                'last_successful': successful_codes[-1] if successful_codes else None,
+                'last_attempt': recent_codes[-1] if recent_codes else None
+            }
+        }
+        
+    except Exception as e:
+        print(f"⚠️ Error in code recovery: {e}")
+        return {
+            'success': False,
+            'message': f'Recovery system error: {str(e)}',
+            'suggested_code': None,
+            'recovery_method': 'error'
+        }
+
+@app.route('/recover', methods=['GET', 'POST'])
+def code_recovery():
+    """
+    Code recovery endpoint for users who forgot their codes.
+    Respects privacy by using only stored behavioral data.
+    """
+    if request.method == 'GET':
+        # Show recovery form
+        if os.path.exists('templates/recovery.html'):
+            return make_response(render_template('recovery.html'))
+        else:
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Code Recovery - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #333; text-align: center; }}
+                    .form-group {{ margin: 20px 0; }}
+                    label {{ display: block; margin-bottom: 5px; font-weight: bold; }}
+                    input[type="text"] {{ width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }}
+                    button {{ background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }}
+                    button:hover {{ background: #0056b3; }}
+                    .info {{ background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                    .recovery-message {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                    .privacy-note {{ background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 20px 0; font-size: 14px; color: #666; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🔐 Code Recovery</h1>
+                    <div class="info">
+                        <strong>Forgot your Yourl code?</strong><br>
+                        Don't worry! We can help you recover your experience based on your previous usage patterns.
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="recovery_method">Recovery Method:</label>
+                            <select name="recovery_method" id="recovery_method" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+                                <option value="auto">🤖 Automatic Recovery (Recommended)</option>
+                                <option value="manual">✍️ Manual Recovery</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="visitor_id">Visitor ID (if you remember it):</label>
+                            <input type="text" id="visitor_id" name="visitor_id" placeholder="Leave blank for automatic detection">
+                        </div>
+                        
+                        <button type="submit">🔍 Recover My Experience</button>
+                    </form>
+                    
+                    <div class="privacy-note">
+                        <strong>🔒 Privacy First:</strong> This recovery system uses only your stored behavioral data (codes you've used before, visit patterns) to help you regain access. We take safeguarding this data as seriously as PHI/PII.
+                    </div>
+                    
+                    <div class="info">
+                        <strong>Need Help?</strong><br>
+                        <a href="/">← Back to Home</a> | <a href="/data">📊 Data Stream</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            return make_response(html_content)
+    
+    elif request.method == 'POST':
+        # Handle recovery request
+        recovery_method = request.form.get('recovery_method', 'auto')
+        visitor_id = request.form.get('visitor_id', '').strip()
+        
+        # Get visitor ID from cookie if not provided
+        if not visitor_id:
+            visitor_id = request.cookies.get('visitor_id')
+        
+        if not visitor_id:
+            error_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Recovery Failed - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #333; text-align: center; }}
+                    .error {{ background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 20px 0; color: #721c24; }}
+                    .info {{ background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🔐 Recovery Failed</h1>
+                    <div class="error">
+                        <strong>No visitor ID found.</strong><br>
+                        We couldn't identify your previous visits. This could happen if:
+                        <ul>
+                            <li>You're using a different browser or device</li>
+                            <li>Your browser cookies were cleared</li>
+                            <li>This is your first visit</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info">
+                        <strong>What you can do:</strong><br>
+                        • <a href="/">Try the current live code</a><br>
+                        • <a href="/recover">Try recovery again</a><br>
+                        • Contact support if you need assistance
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            return make_response(error_html)
+        
+        # Attempt recovery
+        recovery_result = attempt_code_recovery(
+            visitor_id=visitor_id,
+            user_agent=request.headers.get('User-Agent', ''),
+            ip_address=get_client_ip() or ''
+        )
+        
+        if recovery_result['success']:
+            suggested_code = recovery_result['suggested_code']
+            recovery_method_used = recovery_result['recovery_method']
+            usage_pattern = recovery_result.get('usage_pattern', {})
+            
+            success_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Recovery Successful - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #333; text-align: center; }}
+                    .success {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 20px 0; color: #155724; }}
+                    .code-display {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center; font-weight: bold; font-size: 18px; }}
+                    .info {{ background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                    .usage-stats {{ background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                    button {{ background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 5px; }}
+                    button:hover {{ background: #0056b3; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🎉 Recovery Successful!</h1>
+                    <div class="success">
+                        <strong>We found your experience!</strong><br>
+                        {recovery_result['message']}
+                    </div>
+                    
+                    <div class="code-display">
+                        <strong>Suggested Code:</strong><br>
+                        <span style="font-size: 24px; color: #007bff;">{suggested_code}</span>
+                    </div>
+                    
+                    <div class="usage-stats">
+                        <strong>📊 Your Usage Pattern:</strong><br>
+                        • Total attempts: {usage_pattern.get('total_attempts', 0)}<br>
+                        • Successful attempts: {usage_pattern.get('successful_attempts', 0)}<br>
+                        • Last successful: {usage_pattern.get('last_successful', 'None')}<br>
+                        • Recovery method: {recovery_method_used.replace('_', ' ').title()}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="window.location.href='/'">🏠 Go to Home</button>
+                        <button onclick="copyToClipboard('{suggested_code}')">📋 Copy Code</button>
+                    </div>
+                    
+                    <div class="info">
+                        <strong>Next Steps:</strong><br>
+                        1. Copy the suggested code above<br>
+                        2. Go to the <a href="/">home page</a><br>
+                        3. Paste the code in the access field<br>
+                        4. Enjoy your recovered experience!
+                    </div>
+                </div>
+                
+                <script>
+                function copyToClipboard(text) {{
+                    navigator.clipboard.writeText(text).then(function() {{
+                        alert('Code copied to clipboard!');
+                    }}, function(err) {{
+                        console.error('Could not copy text: ', err);
+                    }});
+                }}
+                </script>
+            </body>
+            </html>
+            """
+            return make_response(success_html)
+        else:
+            # Recovery failed
+            failed_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Recovery Failed - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #333; text-align: center; }}
+                    .error {{ background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 20px 0; color: #721c24; }}
+                    .info {{ background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🔐 Recovery Failed</h1>
+                    <div class="error">
+                        <strong>Recovery unsuccessful.</strong><br>
+                        {recovery_result['message']}
+                    </div>
+                    
+                    <div class="info">
+                        <strong>What you can do:</strong><br>
+                        • <a href="/">Try the current live code</a><br>
+                        • <a href="/recover">Try recovery again</a><br>
+                        • Contact support if you need assistance<br>
+                        • Remember: It's OK to start over - the system will remember you based on how you use it!
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            return make_response(failed_html)
+
 if __name__ == '__main__':
     # Determine the display address for users
     if HOST == '0.0.0.0':

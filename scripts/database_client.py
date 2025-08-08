@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class DatabaseClient:
-    def __init__(self, project_id: str = None, connection_string: str = None):
+    def __init__(self, project_id: Optional[str] = None, connection_string: Optional[str] = None):
         """
         Initialize database client with either project_id (for Secret Manager) or connection_string
         """
@@ -770,6 +770,30 @@ class DatabaseClient:
         except Exception as e:
             logger.error(f"Error getting landing page version: {e}")
             return None
+        finally:
+            conn.close()
+    
+    def get_visitor_access_history(self, visitor_id: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """Get visitor's access history for code recovery"""
+        conn = self._get_connection()
+        if not conn:
+            return []
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT access_code, success, access_timestamp, ip_address, user_agent, session_id
+                    FROM visitor_access_history 
+                    WHERE visitor_id = %s
+                    ORDER BY access_timestamp DESC
+                    LIMIT %s
+                """, (visitor_id, limit))
+                
+                results = cursor.fetchall()
+                return [dict(result) for result in results] if results else []
+        except Exception as e:
+            logger.error(f"Error getting visitor access history: {e}")
+            return []
         finally:
             conn.close()
 
