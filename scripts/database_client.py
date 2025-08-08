@@ -1,0 +1,354 @@
+#!/usr/bin/env python3
+"""
+Cloud SQL Database Client for Yourl.Cloud Marketing Codes
+Handles persistent storage of code history, usage logs, and authorization records
+"""
+
+import os
+import json
+import psycopg2
+from datetime import datetime, timezone
+from typing import Dict, Optional, Any, List
+from psycopg2.extras import RealDictCursor
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class DatabaseClient:
+    def __init__(self, connection_string: str):
+        self.connection_string = connection_string
+        self._ensure_tables()
+    
+    def _get_connection(self):
+        """Get a database connection"""
+        try:
+            conn = psycopg2.connect(self.connection_string)
+            return conn
+        except Exception as e:
+            logger.error(f"Database connection error: {e}")
+            return None
+    
+    def _ensure_tables(self):
+        """Ensure all required tables exist"""
+        conn = self._get_connection()
+        if not conn:
+            return
+        
+        try:
+            with conn.cursor() as cursor:
+                # Marketing code history table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS marketing_code_history (
+                        id SERIAL PRIMARY KEY,
+                        code VARCHAR(50) NOT NULL,
+                        code_type VARCHAR(20) NOT NULL, -- 'current', 'next', 'archived'
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        deployed_at TIMESTAMP WITH TIME ZONE,
+                        commit_hash VARCHAR(50),
+                        deployment_id VARCHAR(100),
+                        rotation_reason VARCHAR(200)
+                    )
+                """)
+                
+                # Usage logs table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS code_usage_logs (
+                        id SERIAL PRIMARY KEY,
+                        code VARCHAR(50) NOT NULL,
+                        user_agent TEXT,
+                        ip_address INET,
+                        endpoint VARCHAR(100),
+                        success BOOLEAN NOT NULL,
+                        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        session_id VARCHAR(100),
+                        device_type VARCHAR(20)
+                    )
+                """)
+                
+                # Authorization records table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS authorization_records (
+                        id SERIAL PRIMARY KEY,
+                        service_name VARCHAR(100) NOT NULL,
+                        service_type VARCHAR(50) NOT NULL, -- 'backend', 'frontend', 'api'
+                        owner VARCHAR(100) NOT NULL,
+                        code VARCHAR(50) NOT NULL,
+                        access_level VARCHAR(50) NOT NULL, -- 'read', 'write', 'admin'
+                        expires_at TIMESTAMP WITH TIME ZONE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        status VARCHAR(20) DEFAULT 'active', -- 'active', 'revoked', 'expired'
+                        revoked_at TIMESTAMP WITH TIME ZONE,
+                        revoked_reason VARCHAR(200)
+                    )
+                """)
+                
+                # Partner onboarding table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS partner_onboarding (
+                        id SERIAL PRIMARY KEY,
+                        partner_name VARCHAR(100) NOT NULL,
+                        partner_type VARCHAR(50) NOT NULL,
+                        contact_email VARCHAR(200),
+                        api_key VARCHAR(100),
+                        onboarding_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+                        approved_by VARCHAR(100),
+                        approved_at TIMESTAMP WITH TIME ZONE,
+                        notes TEXT
+                    )
+                """)
+                
+                conn.commit()
+                logger.info("Database tables ensured successfully")
+                
+        except Exception as e:
+            logger.error(f"Error ensuring tables: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
+    
+    def log_code_history(self, code: str, code_type: str, commit_hash: Optional[str] = None, 
+                        deployment_id: Optional[str] = None, rotation_reason: Optional[str] = None) -> bool:
+        """Log a marketing code change"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO marketing_code_history 
+                    (code, code_type, commit_hash, deployment_id, rotation_reason, deployed_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (code, code_type, commit_hash, deployment_id, rotation_reason, datetime.now(timezone.utc)))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error logging code history: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def log_usage(self, code: str, user_agent: Optional[str] = None, ip_address: Optional[str] = None,
+                  endpoint: Optional[str] = None, success: bool = True, session_id: Optional[str] = None,
+                  device_type: Optional[str] = None) -> bool:
+        """Log code usage"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO code_usage_logs 
+                    (code, user_agent, ip_address, endpoint, success, session_id, device_type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (code, user_agent, ip_address, endpoint, success, session_id, device_type))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error logging usage: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def create_authorization_record(self, service_name: str, service_type: str, owner: str,
+                                  code: str, access_level: str, expires_at: Optional[datetime] = None) -> bool:
+        """Create a new authorization record"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO authorization_records 
+                    (service_name, service_type, owner, code, access_level, expires_at)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (service_name, service_type, owner, code, access_level, expires_at))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error creating authorization record: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def revoke_authorization(self, service_name: str, reason: Optional[str] = None) -> bool:
+        """Revoke authorization for a service"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE authorization_records 
+                    SET status = 'revoked', revoked_at = %s, revoked_reason = %s
+                    WHERE service_name = %s AND status = 'active'
+                """, (datetime.now(timezone.utc), reason, service_name))
+                
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Error revoking authorization: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def get_code_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Get marketing code history"""
+        conn = self._get_connection()
+        if not conn:
+            return []
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT * FROM marketing_code_history 
+                    ORDER BY created_at DESC 
+                    LIMIT %s
+                """, (limit,))
+                
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Error getting code history: {e}")
+            return []
+        finally:
+            conn.close()
+    
+    def get_usage_stats(self, days: int = 30) -> Dict[str, Any]:
+        """Get usage statistics"""
+        conn = self._get_connection()
+        if not conn:
+            return {}
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                # Total usage
+                cursor.execute("""
+                    SELECT COUNT(*) as total_usage,
+                           COUNT(CASE WHEN success = true THEN 1 END) as successful_usage,
+                           COUNT(CASE WHEN success = false THEN 1 END) as failed_usage
+                    FROM code_usage_logs 
+                    WHERE timestamp >= NOW() - INTERVAL '%s days'
+                """, (days,))
+                
+                usage_stats = cursor.fetchone()
+                
+                # Usage by code
+                cursor.execute("""
+                    SELECT code, COUNT(*) as usage_count
+                    FROM code_usage_logs 
+                    WHERE timestamp >= NOW() - INTERVAL '%s days'
+                    GROUP BY code
+                    ORDER BY usage_count DESC
+                """, (days,))
+                
+                usage_by_code = [dict(row) for row in cursor.fetchall()]
+                
+                if usage_stats:
+                    return {
+                        "period_days": days,
+                        "total_usage": usage_stats['total_usage'],
+                        "successful_usage": usage_stats['successful_usage'],
+                        "failed_usage": usage_stats['failed_usage'],
+                        "usage_by_code": usage_by_code
+                    }
+                else:
+                    return {
+                        "period_days": days,
+                        "total_usage": 0,
+                        "successful_usage": 0,
+                        "failed_usage": 0,
+                        "usage_by_code": usage_by_code
+                    }
+        except Exception as e:
+            logger.error(f"Error getting usage stats: {e}")
+            return {}
+        finally:
+            conn.close()
+    
+    def get_active_authorizations(self) -> List[Dict[str, Any]]:
+        """Get all active authorizations"""
+        conn = self._get_connection()
+        if not conn:
+            return []
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT * FROM authorization_records 
+                    WHERE status = 'active' AND (expires_at IS NULL OR expires_at > NOW())
+                    ORDER BY created_at DESC
+                """)
+                
+                return [dict(row) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Error getting active authorizations: {e}")
+            return []
+        finally:
+            conn.close()
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Database Client")
+    parser.add_argument("--connection-string", required=True, help="Database connection string")
+    parser.add_argument("--action", choices=['log-history', 'log-usage', 'create-auth', 'revoke-auth', 'get-history', 'get-stats', 'get-auths'],
+                       required=True, help="Action to perform")
+    parser.add_argument("--code", help="Marketing code")
+    parser.add_argument("--code-type", help="Code type (current, next, archived)")
+    parser.add_argument("--service-name", help="Service name")
+    parser.add_argument("--owner", help="Owner")
+    parser.add_argument("--access-level", help="Access level")
+    parser.add_argument("--days", type=int, default=30, help="Days for stats")
+    
+    args = parser.parse_args()
+    
+    client = DatabaseClient(args.connection_string)
+    
+    if args.action == 'log-history':
+        if not all([args.code, args.code_type]):
+            parser.error("--code and --code-type required for log-history action")
+        success = client.log_code_history(args.code, args.code_type)
+        print(f"Logged code history: {'Success' if success else 'Failed'}")
+        
+    elif args.action == 'log-usage':
+        if not args.code:
+            parser.error("--code required for log-usage action")
+        success = client.log_usage(args.code)
+        print(f"Logged usage: {'Success' if success else 'Failed'}")
+        
+    elif args.action == 'create-auth':
+        if not all([args.service_name, args.owner, args.code, args.access_level]):
+            parser.error("--service-name, --owner, --code, and --access-level required for create-auth action")
+        success = client.create_authorization_record(args.service_name, "api", args.owner, args.code, args.access_level)
+        print(f"Created authorization: {'Success' if success else 'Failed'}")
+        
+    elif args.action == 'revoke-auth':
+        if not args.service_name:
+            parser.error("--service-name required for revoke-auth action")
+        success = client.revoke_authorization(args.service_name)
+        print(f"Revoked authorization: {'Success' if success else 'Failed'}")
+        
+    elif args.action == 'get-history':
+        history = client.get_code_history()
+        print(json.dumps(history, indent=2, default=str))
+        
+    elif args.action == 'get-stats':
+        stats = client.get_usage_stats(args.days)
+        print(json.dumps(stats, indent=2, default=str))
+        
+    elif args.action == 'get-auths':
+        auths = client.get_active_authorizations()
+        print(json.dumps(auths, indent=2, default=str))

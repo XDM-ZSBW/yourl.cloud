@@ -124,13 +124,13 @@ def generate_marketing_password():
 
 def get_current_marketing_password():
     """
-    Get the current live marketing password (for Perplexity/landing page display).
+    Get the current live marketing password from Google Secret Manager.
     This should only change after successful deployment.
     """
     try:
-        from scripts.marketing_code_manager import MarketingCodeManager
-        manager = MarketingCodeManager(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
-        return manager.get_live_experience_code()
+        from scripts.secret_manager_client import SecretManagerClient
+        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
+        return client.get_current_marketing_code()
     except Exception as e:
         # Fallback to environment variable or generate based on commit
         build_password = os.environ.get('BUILD_MARKETING_PASSWORD')
@@ -142,13 +142,13 @@ def get_current_marketing_password():
 
 def get_next_marketing_password():
     """
-    Get the next marketing password (for Cursor/authenticated users).
+    Get the next marketing password from Google Secret Manager.
     This is what will become the current code after next deployment.
     """
     try:
-        from scripts.marketing_code_manager import MarketingCodeManager
-        manager = MarketingCodeManager(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
-        return manager.get_next_build_code()
+        from scripts.secret_manager_client import SecretManagerClient
+        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
+        return client.get_next_marketing_code()
     except Exception as e:
         # Fallback: generate next code based on current commit
         try:
