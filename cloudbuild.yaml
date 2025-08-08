@@ -11,33 +11,8 @@ options:
 substitutions:
   _NOTIFICATION_EMAIL: 'bcherrman@gmail.com'
   _DEPLOY_REGION: 'us-west1'
-  _TRIGGER_TYPE: 'manual'
 
 steps:
-  # Generate marketing codes for this deployment
-  - name: 'python:3.9'
-    id: 'generate-codes'
-    entrypoint: python
-    args:
-      - 'scripts/marketing_code.py'
-      - '--project'
-      - '$PROJECT_ID'
-      - '--action'
-      - 'create-deployment'
-      - '--context'
-      - |
-        {
-          "commit_sha": "$COMMIT_SHA",
-          "build_id": "$BUILD_ID",
-          "environment": "production",
-          "features": ["marketing-code-display"],
-          "donor_funded_features": [],
-          "trigger_type": "$_TRIGGER_TYPE",
-          "branch": "$BRANCH_NAME"
-        }
-    env:
-      - 'PYTHONPATH=/workspace'
-
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build'
@@ -71,42 +46,6 @@ steps:
       - '1'
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
-
-  # Generate audit report
-  - name: 'python:3.9'
-    id: 'audit-report'
-    entrypoint: python
-    args:
-      - 'scripts/marketing_code.py'
-      - '--project'
-      - '$PROJECT_ID'
-      - '--action'
-      - 'audit'
-    env:
-      - 'PYTHONPATH=/workspace'
-
-  # Send deployment notification
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    id: 'notify'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Sending deployment notification"
-        gcloud functions call sendBuildNotification \
-          --region ${_DEPLOY_REGION} \
-          --data '{
-            "to": "'${_NOTIFICATION_EMAIL}'",
-            "message": {
-              "subject": "Yourl.Cloud Deployment - '$COMMIT_SHA'",
-              "body": {
-                "text": "Deployment completed successfully.\n\nView build: https://console.cloud.google.com/cloud-build/builds;region=global/'$BUILD_ID'?project='$PROJECT_ID'"
-              }
-            }
-          }'
-
-  # Note: GitHub status updates require GITHUB_TOKEN environment variable
-  # which is not available as a built-in substitution
 
 images:
   - 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA'
