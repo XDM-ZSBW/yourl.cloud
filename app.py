@@ -519,6 +519,7 @@ def main_endpoint():
             visitor_id = visitor_data.get('visitor_id', 'unknown')
             
             # Store landing page version in SQL if database is available
+            landing_page_version = None
             try:
                 database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
                 if database_connection:
