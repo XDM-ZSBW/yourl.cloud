@@ -860,13 +860,14 @@ def main_endpoint():
                         <p><strong>Current Marketing Code:</strong> {current_password}</p>
                     </div>
 
-                    <!-- Navigation -->
-                    <div class="navigation">
-                        <a href="/" class="nav-btn">🏠 Back to Landing Page</a>
-                        <a href="/api" class="nav-btn">🔌 API Documentation</a>
-                        <a href="/status" class="nav-btn">📊 Service Status</a>
-                        <a href="/health" class="nav-btn">❤️ Health Check</a>
-                    </div>
+                                                    <!-- Navigation -->
+                                <div class="navigation">
+                                    <a href="/" class="nav-btn">🏠 Back to Landing Page</a>
+                                    <a href="/data" class="nav-btn">📊 Data Stream</a>
+                                    <a href="/api" class="nav-btn">🔌 API Documentation</a>
+                                    <a href="/status" class="nav-btn">📊 Service Status</a>
+                                    <a href="/health" class="nav-btn">❤️ Health Check</a>
+                                </div>
 
                     <!-- Footer with Legal Information -->
                     <div class="footer">
@@ -1255,9 +1256,81 @@ def data_stream():
     """
     Data stream endpoint providing vertical linear datastream with horizontally scrollable wiki stories.
     Each frame represents a story interpretation of the vertical scroll area.
+    Only accessible to authenticated users who have previously used a valid code.
     """
     # Get visitor data for personalization
     visitor_data = get_visitor_data()
+    
+    # Check if visitor has authenticated (used a valid code previously)
+    if not visitor_data.get('has_used_code', False):
+        return make_response("""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Access Denied - Data Stream</title>
+            <style>
+                body { 
+                    font-family: 'Courier New', monospace;
+                    background: #000;
+                    color: #ff0000;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                }
+                .access-denied {
+                    text-align: center;
+                    padding: 40px;
+                    border: 2px solid #ff0000;
+                    border-radius: 10px;
+                    background: rgba(255, 0, 0, 0.1);
+                }
+                .error-code {
+                    font-size: 3rem;
+                    margin-bottom: 20px;
+                    text-shadow: 0 0 20px #ff0000;
+                }
+                .message {
+                    font-size: 1.2rem;
+                    margin-bottom: 30px;
+                }
+                .nav-btn {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background: #ff0000;
+                    color: #000;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-weight: bold;
+                    margin: 10px;
+                }
+                .nav-btn:hover {
+                    background: #cc0000;
+                    color: #fff;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="access-denied">
+                <div class="error-code">🔒 ACCESS DENIED</div>
+                <div class="message">
+                    <p><strong>Data Stream Access Restricted</strong></p>
+                    <p>This endpoint is only accessible to authenticated users.</p>
+                    <p>You must first use a valid marketing code on the landing page.</p>
+                    <p>Visitor ID: {visitor_data.get('visitor_id', 'Unknown')}</p>
+                    <p>Authentication Status: Not Authenticated</p>
+                </div>
+                <div>
+                    <a href="/" class="nav-btn">🏠 Return to Landing Page</a>
+                    <a href="/status" class="nav-btn">📊 Service Status</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """, 403)
     
     # Generate dynamic story frames based on current time and visitor data
     import time
