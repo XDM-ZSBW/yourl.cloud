@@ -16,7 +16,7 @@ WSGI Server: Production Ready
 Domain Mapping: Compatible
 """
 
-from flask import Flask, request, jsonify, render_template_string, render_template
+from flask import Flask, request, jsonify, render_template_string, render_template, make_response
 import socket
 import os
 import re
@@ -353,18 +353,80 @@ def is_visual_inspection_allowed(device_type):
     
     return FRIENDS_FAMILY_GUARD["visual_inspection"].get(f"{device_type}_allowed", False)
 
+def get_visitor_data():
+    """
+    Get visitor tracking data for the current request.
+    Returns visitor information for the landing page.
+    """
+    try:
+        # Get visitor ID from session or generate one
+        visitor_id = request.cookies.get('visitor_id')
+        if not visitor_id:
+            import uuid
+            visitor_id = str(uuid.uuid4())
+        
+        # Try to get database connection
+        database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
+        if database_connection:
+            from scripts.database_client import DatabaseClient
+            db_client = DatabaseClient(database_connection)
+            
+            # Get or create visitor record
+            visitor = db_client.get_or_create_visitor(
+                visitor_id=visitor_id,
+                user_agent=request.headers.get('User-Agent'),
+                ip_address=get_client_ip(),
+                device_type=detect_device_type(request.headers.get('User-Agent', ''))
+            )
+            
+            if visitor:
+                return {
+                    'visitor_id': visitor.get('visitor_id'),
+                    'tracking_key': visitor.get('public_tracking_key'),
+                    'last_access_code': visitor.get('last_access_code'),
+                    'total_visits': visitor.get('total_visits', 1),
+                    'is_new_visitor': visitor.get('total_visits', 1) == 1,
+                    'has_used_code': visitor.get('last_access_code') is not None
+                }
+        
+        # Fallback if database not available
+        return {
+            'visitor_id': visitor_id,
+            'tracking_key': None,
+            'last_access_code': None,
+            'total_visits': 1,
+            'is_new_visitor': True,
+            'has_used_code': False
+        }
+        
+    except Exception as e:
+        print(f"⚠️ Error getting visitor data: {e}")
+        return {
+            'visitor_id': request.cookies.get('visitor_id', 'unknown'),
+            'tracking_key': None,
+            'last_access_code': None,
+            'total_visits': 1,
+            'is_new_visitor': True,
+            'has_used_code': False
+        }
+
 @app.route('/', methods=['GET', 'POST'])
 def main_endpoint():
     """
     Main endpoint that handles both GET (landing page) and POST (authentication).
-    Compatible with Cloud Run domain mappings.
+    Compatible with Cloud Run domain mappings with visitor tracking.
     """
     if request.method == 'GET':
         # Get current marketing password
         current_password = get_current_marketing_password()
         
-        # Return the landing page
-        return render_template('index.html', marketing_code=current_password) if os.path.exists('templates/index.html') else f"""
+        # Get visitor information
+        visitor_data = get_visitor_data()
+        
+        # Return the landing page with visitor data
+        return render_template('index.html', 
+                             marketing_code=current_password,
+                             visitor_data=visitor_data) if os.path.exists('templates/index.html') else f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -427,12 +489,26 @@ def main_endpoint():
                 if database_connection:
                     from scripts.database_client import DatabaseClient
                     db_client = DatabaseClient(database_connection)
+                    
+                    # Log usage
                     db_client.log_usage(current_password, request.headers.get('User-Agent'), 
                                       get_client_ip(), '/auth', True)
+                    
+                    # Log visitor access
+                    visitor_id = request.cookies.get('visitor_id')
+                    if visitor_id:
+                        db_client.log_visitor_access(
+                            visitor_id=visitor_id,
+                            access_code=current_password,
+                            success=True,
+                            user_agent=request.headers.get('User-Agent'),
+                            ip_address=get_client_ip()
+                        )
             except Exception as e:
                 print(f"⚠️ Database logging failed: {e}")
             
-            return jsonify({
+            # Create response with visitor cookie
+            response = jsonify({
                 "status": "authenticated",
                 "message": "🎉 Welcome to Yourl.Cloud API! Marketing password accepted!",
                 "connections": DEMO_CONFIG["connections"],
@@ -447,6 +523,14 @@ def main_endpoint():
                     "cursor": "next_marketing_password"
                 }
             })
+            
+            # Set visitor cookie if not already set
+            if not request.cookies.get('visitor_id'):
+                import uuid
+                visitor_id = str(uuid.uuid4())
+                response.set_cookie('visitor_id', visitor_id, max_age=365*24*60*60)  # 1 year
+            
+            return response
         else:
             # Log failed authentication attempt to database if available
             try:
@@ -454,12 +538,26 @@ def main_endpoint():
                 if database_connection:
                     from scripts.database_client import DatabaseClient
                     db_client = DatabaseClient(database_connection)
+                    
+                    # Log usage
                     db_client.log_usage(current_password, request.headers.get('User-Agent'), 
                                       get_client_ip(), '/auth', False)
+                    
+                    # Log visitor access
+                    visitor_id = request.cookies.get('visitor_id')
+                    if visitor_id:
+                        db_client.log_visitor_access(
+                            visitor_id=visitor_id,
+                            access_code=password,  # Log the attempted code
+                            success=False,
+                            user_agent=request.headers.get('User-Agent'),
+                            ip_address=get_client_ip()
+                        )
             except Exception as e:
                 print(f"⚠️ Database logging failed: {e}")
             
-            return f"""
+            # Create response with visitor cookie
+            html_content = f"""
             <!DOCTYPE html>
             <html>
             <head>
@@ -485,6 +583,16 @@ def main_endpoint():
             </body>
             </html>
             """
+            
+            response = make_response(html_content)
+            
+            # Set visitor cookie if not already set
+            if not request.cookies.get('visitor_id'):
+                import uuid
+                visitor_id = str(uuid.uuid4())
+                response.set_cookie('visitor_id', visitor_id, max_age=365*24*60*60)  # 1 year
+            
+            return response
     
     else:
         return jsonify({"error": "Method not allowed"}), 405

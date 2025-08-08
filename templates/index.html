@@ -264,7 +264,7 @@
             <p>AI-Friendly Service Hub - Secure and Fast</p>
         </div>
         
-        <!-- Marketing Code Section -->
+                <!-- Marketing Code Section -->
         <div class="marketing-code">
             <h2>🎯 Today's Access Code</h2>
             <div class="code-display" id="codeDisplay" onclick="copyCode()" title="Click to copy">
@@ -275,16 +275,47 @@
             </div>
             <p class="code-hint">👆 Click to copy, then paste into the access box below to proceed to the next level!</p>
         </div>
-        
+
         <div class="main-panel">
             <div class="input-section">
                 <h2>🔐 Level Access</h2>
                 <form method="POST" action="/">
                     <div class="input-group">
-                        <input type="password" name="password" placeholder="Paste the access code here" required>
+                        <input type="password" name="password" 
+                               placeholder="Paste the access code here" 
+                               value="{{ visitor_data.last_access_code if visitor_data and visitor_data.has_used_code else '' }}"
+                               {{ 'readonly' if visitor_data and visitor_data.has_used_code else '' }}
+                               required>
                         <button type="submit" class="submit-btn">Proceed to Next Level</button>
                     </div>
                 </form>
+                
+                <!-- Visitor Tracking Section -->
+                {% if visitor_data and visitor_data.tracking_key %}
+                <div class="visitor-tracking" style="margin-top: 1rem; padding: 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 10px;">
+                    <h3 style="color: #ffd700; font-size: 1rem; margin-bottom: 0.5rem;">
+                        {% if visitor_data.has_used_code %}
+                        📊 Your Visitor Tracking Code
+                        {% else %}
+                        📊 Your Visitor Tracking Code (for analytics)
+                        {% endif %}
+                    </h3>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin: 0;">
+                        {% if visitor_data.has_used_code %}
+                        <strong style="color: #ffd700;">{{ visitor_data.tracking_key }}</strong> - This is your persistent tracking code for analytics and audit purposes.
+                        {% else %}
+                        <span style="color: rgba(255, 255, 255, 0.6);">{{ visitor_data.tracking_key }}</span> - This is your tracking code for analytics (not used for access).
+                        {% endif %}
+                    </p>
+                    <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.5rem;">
+                        {% if visitor_data.is_new_visitor %}
+                        👋 Welcome! This is your first visit.
+                        {% else %}
+                        🎯 Visit #{{ visitor_data.total_visits }} - Welcome back!
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
             </div>
             
             <div class="affiliate-links">

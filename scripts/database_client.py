@@ -100,6 +100,38 @@ class DatabaseClient:
                     )
                 """)
                 
+                # Visitor tracking table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS visitor_tracking (
+                        id SERIAL PRIMARY KEY,
+                        visitor_id VARCHAR(100) UNIQUE NOT NULL,
+                        public_tracking_key VARCHAR(50) UNIQUE NOT NULL,
+                        first_visit_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        last_visit_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        last_access_code VARCHAR(50),
+                        total_visits INTEGER DEFAULT 1,
+                        device_type VARCHAR(20),
+                        user_agent TEXT,
+                        ip_address INET,
+                        status VARCHAR(20) DEFAULT 'active' -- 'active', 'inactive', 'blocked'
+                    )
+                """)
+                
+                # Visitor access history table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS visitor_access_history (
+                        id SERIAL PRIMARY KEY,
+                        visitor_id VARCHAR(100) NOT NULL,
+                        access_code VARCHAR(50) NOT NULL,
+                        access_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        success BOOLEAN NOT NULL,
+                        ip_address INET,
+                        user_agent TEXT,
+                        session_id VARCHAR(100),
+                        FOREIGN KEY (visitor_id) REFERENCES visitor_tracking(visitor_id)
+                    )
+                """)
+                
                 conn.commit()
                 logger.info("Database tables ensured successfully")
                 
@@ -296,6 +328,146 @@ class DatabaseClient:
         except Exception as e:
             logger.error(f"Error getting active authorizations: {e}")
             return []
+        finally:
+            conn.close()
+    
+    def get_or_create_visitor(self, visitor_id: str, user_agent: Optional[str] = None, 
+                             ip_address: Optional[str] = None, device_type: Optional[str] = None) -> Dict[str, Any]:
+        """Get or create a visitor record"""
+        conn = self._get_connection()
+        if not conn:
+            return {}
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                # Check if visitor exists
+                cursor.execute("""
+                    SELECT * FROM visitor_tracking 
+                    WHERE visitor_id = %s
+                """, (visitor_id,))
+                
+                visitor = cursor.fetchone()
+                
+                if visitor:
+                    # Update last visit
+                    cursor.execute("""
+                        UPDATE visitor_tracking 
+                        SET last_visit_at = NOW(), total_visits = total_visits + 1,
+                            user_agent = %s, ip_address = %s, device_type = %s
+                        WHERE visitor_id = %s
+                    """, (user_agent, ip_address, device_type, visitor_id))
+                    
+                    conn.commit()
+                    return dict(visitor)
+                else:
+                    # Create new visitor
+                    import random
+                    import string
+                    
+                    # Generate unique tracking key
+                    tracking_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+                    
+                    cursor.execute("""
+                        INSERT INTO visitor_tracking 
+                        (visitor_id, public_tracking_key, user_agent, ip_address, device_type)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING *
+                    """, (visitor_id, tracking_key, user_agent, ip_address, device_type))
+                    
+                    new_visitor = cursor.fetchone()
+                    conn.commit()
+                    return dict(new_visitor) if new_visitor else {}
+                    
+        except Exception as e:
+            logger.error(f"Error getting/creating visitor: {e}")
+            conn.rollback()
+            return {}
+        finally:
+            conn.close()
+    
+    def log_visitor_access(self, visitor_id: str, access_code: str, success: bool,
+                          user_agent: Optional[str] = None, ip_address: Optional[str] = None,
+                          session_id: Optional[str] = None) -> bool:
+        """Log visitor access attempt"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                # Log access history
+                cursor.execute("""
+                    INSERT INTO visitor_access_history 
+                    (visitor_id, access_code, success, ip_address, user_agent, session_id)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (visitor_id, access_code, success, ip_address, user_agent, session_id))
+                
+                # Update visitor's last access code if successful
+                if success:
+                    cursor.execute("""
+                        UPDATE visitor_tracking 
+                        SET last_access_code = %s
+                        WHERE visitor_id = %s
+                    """, (access_code, visitor_id))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error logging visitor access: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def get_visitor_stats(self, days: int = 30) -> Dict[str, Any]:
+        """Get visitor statistics"""
+        conn = self._get_connection()
+        if not conn:
+            return {}
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                # Total visitors
+                cursor.execute("""
+                    SELECT COUNT(*) as total_visitors,
+                           COUNT(CASE WHEN last_visit_at >= NOW() - INTERVAL '%s days' THEN 1 END) as active_visitors
+                    FROM visitor_tracking
+                """, (days,))
+                
+                visitor_stats = cursor.fetchone()
+                
+                # Access attempts
+                cursor.execute("""
+                    SELECT COUNT(*) as total_attempts,
+                           COUNT(CASE WHEN success = true THEN 1 END) as successful_attempts,
+                           COUNT(CASE WHEN success = false THEN 1 END) as failed_attempts
+                    FROM visitor_access_history 
+                    WHERE access_timestamp >= NOW() - INTERVAL '%s days'
+                """, (days,))
+                
+                access_stats = cursor.fetchone()
+                
+                if visitor_stats and access_stats:
+                    return {
+                        "period_days": days,
+                        "total_visitors": visitor_stats['total_visitors'],
+                        "active_visitors": visitor_stats['active_visitors'],
+                        "total_access_attempts": access_stats['total_attempts'],
+                        "successful_attempts": access_stats['successful_attempts'],
+                        "failed_attempts": access_stats['failed_attempts']
+                    }
+                else:
+                    return {
+                        "period_days": days,
+                        "total_visitors": 0,
+                        "active_visitors": 0,
+                        "total_access_attempts": 0,
+                        "successful_attempts": 0,
+                        "failed_attempts": 0
+                    }
+        except Exception as e:
+            logger.error(f"Error getting visitor stats: {e}")
+            return {}
         finally:
             conn.close()
 
