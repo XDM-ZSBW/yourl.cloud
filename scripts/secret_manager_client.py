@@ -43,7 +43,8 @@ class SecretManagerClient:
             secret.replication.automatic = secretmanager.Replication.Automatic()
             
             if description:
-                secret.labels["description"] = description
+                # Use a valid label key (lowercase, no spaces)
+                secret.labels["purpose"] = description.lower().replace(" ", "_")
             
             self.client.create_secret(
                 request={
