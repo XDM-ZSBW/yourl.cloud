@@ -507,24 +507,45 @@ def main_endpoint():
             except Exception as e:
                 print(f"⚠️ Database logging failed: {e}")
             
-            # Create response with visitor cookie
-            response = jsonify({
-                "status": "authenticated",
-                "message": "🎉 Welcome to Yourl.Cloud API! Marketing password accepted!",
-                "connections": DEMO_CONFIG["connections"],
-                "timestamp": datetime.utcnow().isoformat(),
-                "organization": FRIENDS_FAMILY_GUARD["organization"],
-                "domain": get_original_host(),
-                "protocol": get_original_protocol(),
-                "current_marketing_password": current_password,
-                "next_marketing_password": next_password,
-                "ownership": {
-                    "perplexity": "current_marketing_password",
-                    "cursor": "next_marketing_password"
-                },
-                "landing_page_url": "/",
-                "back_to_landing": "🔗 Click here to return to the landing page"
-            })
+            # Create HTML response with clickable links
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Authentication Success - Yourl.Cloud</title>
+                <meta charset="utf-8">
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; text-align: center; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    h1 {{ color: #28a745; }}
+                    .success-box {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+                    .btn {{ background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px; }}
+                    .code-display {{ background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 5px; margin: 10px 0; font-family: monospace; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>✅ Authentication Successful!</h1>
+                    <div class="success-box">
+                        <p><strong>🎉 Welcome to Yourl.Cloud API!</strong></p>
+                        <p>Marketing password accepted!</p>
+                    </div>
+                    
+                    <h3>📊 Current Status:</h3>
+                    <div class="code-display">
+                        <strong>Current Code:</strong> {current_password}<br>
+                        <strong>Next Code:</strong> {next_password}
+                    </div>
+                    
+                    <h3>🔗 Quick Links:</h3>
+                    <a href="/" class="btn">🏠 Back to Landing Page</a>
+                    <a href="/api" class="btn">🔍 View API Endpoint</a>
+                    <a href="/status" class="btn">📊 Check Status</a>
+                </div>
+            </body>
+            </html>
+            """
+            response = make_response(html_content)
             
             # Set visitor cookie if not already set
             if not request.cookies.get('visitor_id'):
