@@ -283,8 +283,8 @@
                     <div class="input-group">
                         <input type="password" name="password" 
                                placeholder="Paste the access code here" 
-                               value="{{ visitor_data.last_access_code if visitor_data and visitor_data.has_used_code else '' }}"
-                               {{ 'readonly' if visitor_data and visitor_data.has_used_code else '' }}
+                               value="{{ visitor_data.last_access_code if visitor_data and visitor_data.has_used_code and visitor_data.last_access_code else '' }}"
+                               {{ 'readonly' if visitor_data and visitor_data.has_used_code and visitor_data.last_access_code else '' }}
                                required>
                         <button type="submit" class="submit-btn">Proceed to Next Level</button>
                     </div>

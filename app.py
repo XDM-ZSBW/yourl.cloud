@@ -411,10 +411,13 @@ def main_endpoint():
         # Get visitor information
         visitor_data = get_visitor_data()
         
-        # Return the landing page with visitor data
-        return render_template('index.html', 
-                             marketing_code=current_password,
-                             visitor_data=visitor_data) if os.path.exists('templates/index.html') else f"""
+        # Create response with no-cache headers to ensure fresh content
+        if os.path.exists('templates/index.html'):
+            response = make_response(render_template('index.html', 
+                                                 marketing_code=current_password,
+                                                 visitor_data=visitor_data))
+        else:
+            response = make_response(f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -460,7 +463,13 @@ def main_endpoint():
             </div>
         </body>
         </html>
-        """
+        """)
+        
+        # Add cache control headers to prevent browser caching
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     
     elif request.method == 'POST':
         # Handle authentication with simple password check
