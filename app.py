@@ -129,7 +129,7 @@ def get_current_marketing_password():
     """
     try:
         from scripts.secret_manager_client import SecretManagerClient
-        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
+        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
         current_code = client.get_current_marketing_code()
         
         if current_code:
@@ -159,7 +159,7 @@ def get_next_marketing_password():
     """
     try:
         from scripts.secret_manager_client import SecretManagerClient
-        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
+        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
         next_code = client.get_next_marketing_code()
         
         if next_code:
@@ -175,7 +175,7 @@ def get_next_marketing_password():
     try:
         commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
                                             text=True, stderr=subprocess.DEVNULL).strip()[:8]
-        next_hash = commit_hash + "next"
+        next_hash = commit_hash + "_next"
     except:
         next_hash = "next_unknown"
     
@@ -199,7 +199,14 @@ def generate_marketing_password_from_hash(commit_hash: str):
     ascii_symbols = ["!", "@", "#", "$", "%", "&", "*", "+", "=", "?", "~", "^"]
     
     # Generate a deterministic but fun password using the commit hash
-    hash_num = int(commit_hash, 16) if commit_hash != "unknown" else hash(commit_hash)
+    # Handle cases where commit_hash might contain non-hex characters
+    try:
+        if commit_hash != "unknown" and all(c in '0123456789abcdefABCDEF' for c in commit_hash):
+            hash_num = int(commit_hash, 16)
+        else:
+            hash_num = hash(commit_hash)
+    except ValueError:
+        hash_num = hash(commit_hash)
     random.seed(hash_num)
     
     # Pick a random marketing word
@@ -345,7 +352,7 @@ def main_endpoint():
         current_password = get_current_marketing_password()
         
         # Return the landing page
-        return render_template('index.html') if os.path.exists('templates/index.html') else f"""
+        return render_template('index.html', marketing_code=current_password) if os.path.exists('templates/index.html') else f"""
         <!DOCTYPE html>
         <html>
         <head>

@@ -117,15 +117,25 @@
         }
         
         .code-display {
-            font-family: monospace;
-            font-size: 1.5rem;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 1rem;
-            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 12px;
             margin: 1rem 0;
-            user-select: all;
             cursor: pointer;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .code-display:hover {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 215, 0, 0.6);
+            transform: scale(1.02);
         }
         
         .code-hint {
@@ -257,8 +267,11 @@
         <!-- Marketing Code Section -->
         <div class="marketing-code">
             <h2>🎯 Today's Access Code</h2>
-            <div class="code-display" onclick="this.select();" title="Click to copy">
-                {{ marketing_code }}
+            <div class="code-display" id="codeDisplay" onclick="copyCode()" title="Click to copy">
+                <span id="codeText">{{ marketing_code }}</span>
+                <div id="copyFeedback" style="display: none; color: #ffd700; font-size: 0.9rem; margin-top: 0.5rem;">
+                    ✅ Copied to clipboard!
+                </div>
             </div>
             <p class="code-hint">👆 Click to copy, then paste into the access box below to proceed to the next level!</p>
         </div>
@@ -322,5 +335,19 @@
             </div>
         </div>
     </div>
+    <script>
+        function copyCode() {
+            const codeText = document.getElementById('codeText').textContent;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const copyFeedback = document.getElementById('copyFeedback');
+                copyFeedback.style.display = 'block';
+                setTimeout(() => {
+                    copyFeedback.style.display = 'none';
+                }, 2000); // Hide after 2 seconds
+            }).catch(err => {
+                console.error('Failed to copy code: ', err);
+            });
+        }
+    </script>
 </body>
 </html>
