@@ -13,14 +13,13 @@ gunicorn==21.2.0  # For Unix/Linux
 
 # Google Cloud services
 google-cloud-secret-manager==2.16.4
-google-cloud-sql-connector==1.2.0
 
-# Database connectivity
-psycopg2-binary==2.9.7
+# Database connectivity (commented out for now)
+# psycopg2-binary==2.9.7
 
-# Email services
-sendgrid==6.10.0
-python-http-client==3.3.7
+# Email services (commented out for now)
+# sendgrid==6.10.0
+# python-http-client==3.3.7
 
 # Additional security packages (optional but recommended)
 # Uncomment if needed for your deployment
