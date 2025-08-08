@@ -29,7 +29,7 @@ def wait_for_instance(project_id, instance_name):
     
     while True:
         result = run_command(
-            f"gcloud sql instances describe {instance_name} --project={project_id} --format='value(state)'",
+            f"gcloud sql instances describe {instance_name} --project={project_id} --format=value(state)",
             "Checking instance status"
         )
         
@@ -65,7 +65,7 @@ def setup_database(project_id, instance_name):
     
     # Get connection info
     connection_info = run_command(
-        f"gcloud sql instances describe {instance_name} --project={project_id} --format='value(connectionName)'",
+        f"gcloud sql instances describe {instance_name} --project={project_id} --format=value(connectionName)",
         "Getting connection info"
     )
     
