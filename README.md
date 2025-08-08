@@ -98,6 +98,84 @@ For detailed domain mapping instructions, see [CLOUD_RUN_DOMAIN_MAPPING.md](wiki
 * **Watch devices blocked** for visual inspection per security rules
 * **Demo authentication** with hardcoded password for rapid prototyping
 * **Production WSGI server**: Gunicorn for all deployments
+
+## 🎯 Marketing Code System
+
+Yourl.Cloud uses a sophisticated marketing code system with persistent storage and proper ownership management.
+
+### Code Types and Ownership
+
+1. **Live Experience Code (Perplexity)**
+   - Displayed on the landing page for all users
+   - Only changes after successful deployment
+   - Stored persistently in `codes/build_codes.json`
+   - Owned by Perplexity (current live experience)
+
+2. **Next Build Code (Cursor)**
+   - Shown to authenticated users after entering the live code
+   - Represents what will become the live code after next deployment
+   - Generated deterministically based on commit hash
+   - Owned by Cursor (future builds)
+
+3. **Service Codes (Future Extensibility)**
+   - For backend/frontend services onboarding
+   - Managed through `scripts/service_code_manager.py`
+   - Each service gets a unique, persistent code
+
+### Code Management
+
+**Current Live Code:**
+```bash
+python scripts/marketing_code_manager.py --project root-wharf-383822 --action get-live
+```
+
+**Next Build Code:**
+```bash
+python scripts/marketing_code_manager.py --project root-wharf-383822 --action get-next
+```
+
+**Update Live Code After Deployment:**
+```bash
+python scripts/update_live_code.py --action update
+```
+
+**Show Current Ownership:**
+```bash
+python scripts/update_live_code.py --action show
+```
+
+### Deployment Process
+
+1. **Build Phase:** Generate new code based on commit hash
+2. **Deploy Phase:** Deploy to Cloud Run
+3. **Update Phase:** Update live experience code with current build code
+4. **Result:** Live code becomes what was the "next" code
+
+### Service Management
+
+**Create Service Code:**
+```bash
+python scripts/service_code_manager.py --project root-wharf-383822 --action create --service-name backend-api --service-type backend --owner cursor
+```
+
+**List Active Services:**
+```bash
+python scripts/service_code_manager.py --project root-wharf-383822 --action list
+```
+
+### Code History and Audit
+
+All codes are stored with timestamps and audit trails:
+- `codes/build_codes.json` - Live experience codes
+- `codes/service_codes.json` - Service-specific codes
+- `codes/marketing_codes.json` - Historical marketing codes
+
+### Security Features
+
+- Codes are deterministic (same commit = same code)
+- No codes are regenerated on page refresh
+- Build-based code generation prevents manipulation
+- Service codes are isolated and secure
 * **All instances are production instances**: Tester decides personal vs work usage
 * **Domain mapping compatibility**: Full support for custom domains
 * Includes health check and status endpoints

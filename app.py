@@ -124,17 +124,74 @@ def generate_marketing_password():
 
 def get_current_marketing_password():
     """
-    Get the current marketing password, generating it if needed.
+    Get the current live marketing password (for Perplexity/landing page display).
+    This should only change after successful deployment.
     """
-    # Check if we have a cached password for this commit
     try:
-        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
-                                            text=True, stderr=subprocess.DEVNULL).strip()[:8]
-    except:
-        commit_hash = "unknown"
+        from scripts.marketing_code_manager import MarketingCodeManager
+        manager = MarketingCodeManager(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
+        return manager.get_live_experience_code()
+    except Exception as e:
+        # Fallback to environment variable or generate based on commit
+        build_password = os.environ.get('BUILD_MARKETING_PASSWORD')
+        if build_password:
+            return build_password
+        
+        # Last resort: generate based on current commit
+        return generate_marketing_password()
+
+def get_next_marketing_password():
+    """
+    Get the next marketing password (for Cursor/authenticated users).
+    This is what will become the current code after next deployment.
+    """
+    try:
+        from scripts.marketing_code_manager import MarketingCodeManager
+        manager = MarketingCodeManager(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
+        return manager.get_next_build_code()
+    except Exception as e:
+        # Fallback: generate next code based on current commit
+        try:
+            commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                                text=True, stderr=subprocess.DEVNULL).strip()[:8]
+            next_hash = commit_hash + "next"
+        except:
+            next_hash = "next_unknown"
+        
+        return generate_marketing_password_from_hash(next_hash)
+
+def generate_marketing_password_from_hash(commit_hash: str):
+    """Generate marketing password from specific commit hash"""
+    # Fun marketing words and phrases (ASCII only)
+    marketing_words = [
+        "CLOUD", "FUTURE", "INNOVATE", "DREAM", "BUILD", "CREATE", "LAUNCH", "FLY",
+        "SPARK", "SHINE", "GLOW", "RISE", "LEAP", "JUMP", "DASH", "ZOOM",
+        "POWER", "MAGIC", "WONDER", "AMAZE", "THRILL", "EXCITE", "INSPIRE", "IGNITE",
+        "ROCKET", "STAR", "MOON", "SUN", "OCEAN", "MOUNTAIN", "FOREST", "RIVER",
+        "TECH", "AI", "CODE", "DATA", "SMART", "FAST", "SECURE", "TRUST",
+        "FRIEND", "FAMILY", "TEAM", "SQUAD", "CREW", "GANG", "TRIBE", "CLAN"
+    ]
     
-    # Generate the password based on current commit
-    return generate_marketing_password()
+    # Fun ASCII symbols and characters
+    ascii_symbols = ["!", "@", "#", "$", "%", "&", "*", "+", "=", "?", "~", "^"]
+    
+    # Generate a deterministic but fun password using the commit hash
+    hash_num = int(commit_hash, 16) if commit_hash != "unknown" else hash(commit_hash)
+    random.seed(hash_num)
+    
+    # Pick a random marketing word
+    word = random.choice(marketing_words)
+    
+    # Pick a random ASCII symbol
+    symbol = random.choice(ascii_symbols)
+    
+    # Generate a short number (2-3 digits)
+    number = random.randint(10, 999)
+    
+    # Combine them in a fun way (ASCII only)
+    password = f"{word}{number}{symbol}"
+    
+    return password
 
 # Friends and Family Guard Ruleset
 FRIENDS_FAMILY_GUARD = {
@@ -319,6 +376,8 @@ def main_endpoint():
         current_password = get_current_marketing_password()
         
         if password == current_password:
+            # Get the next code for authenticated users (Cursor ownership)
+            next_password = get_next_marketing_password()
             return jsonify({
                 "status": "authenticated",
                 "message": "🎉 Welcome to Yourl.Cloud API! Marketing password accepted!",
@@ -327,7 +386,12 @@ def main_endpoint():
                 "organization": FRIENDS_FAMILY_GUARD["organization"],
                 "domain": get_original_host(),
                 "protocol": get_original_protocol(),
-                "marketing_password": current_password
+                "current_marketing_password": current_password,
+                "next_marketing_password": next_password,
+                "ownership": {
+                    "perplexity": "current_marketing_password",
+                    "cursor": "next_marketing_password"
+                }
             })
         else:
             return f"""

@@ -46,6 +46,18 @@ steps:
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
 
+  # Update live experience code after successful deployment
+  - name: 'python:3.9'
+    id: 'update-live-code'
+    entrypoint: python
+    args:
+      - 'scripts/update_live_code.py'
+      - '--action'
+      - 'update'
+    env:
+      - 'PYTHONPATH=/workspace'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+
 images:
   - 'gcr.io/$PROJECT_ID/yourl-cloud:$COMMIT_SHA'
 
