@@ -586,7 +586,301 @@ def main_endpoint():
                     "previous_url": landing_page_version.get('landing_page_url')
                 }
             
-            response = jsonify(json_response)
+            # Create comprehensive HTML page for public searchable representation
+            html_content = f"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Yourl.Cloud Inc. - Cloud Infrastructure & API Services</title>
+                <meta name="description" content="Yourl.Cloud Inc. provides cloud infrastructure, API services, and digital solutions. Based in the United States, serving global clients with secure, scalable technology solutions.">
+                <meta name="keywords" content="cloud infrastructure, API services, digital solutions, technology, Yourl.Cloud, United States">
+                <meta name="author" content="Yourl.Cloud Inc.">
+                <meta name="robots" content="index, follow">
+                <meta property="og:title" content="Yourl.Cloud Inc. - Cloud Infrastructure & API Services">
+                <meta property="og:description" content="Secure, scalable cloud infrastructure and API services for modern businesses.">
+                <meta property="og:type" content="website">
+                <meta property="og:url" content="https://yourl.cloud">
+                <meta property="og:site_name" content="Yourl.Cloud Inc.">
+                <link rel="canonical" href="https://yourl.cloud">
+                
+                <style>
+                    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                    body {{ 
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        min-height: 100vh;
+                    }}
+                    .container {{ 
+                        max-width: 1200px; 
+                        margin: 0 auto; 
+                        padding: 20px;
+                        background: rgba(255, 255, 255, 0.95);
+                        border-radius: 15px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                        margin-top: 20px;
+                        margin-bottom: 20px;
+                    }}
+                    .header {{ 
+                        text-align: center; 
+                        padding: 40px 0;
+                        border-bottom: 3px solid #667eea;
+                        margin-bottom: 30px;
+                    }}
+                    .logo {{ 
+                        font-size: 3rem; 
+                        font-weight: bold; 
+                        color: #667eea;
+                        margin-bottom: 10px;
+                    }}
+                    .tagline {{ 
+                        font-size: 1.2rem; 
+                        color: #666;
+                        margin-bottom: 20px;
+                    }}
+                    .success-banner {{ 
+                        background: linear-gradient(45deg, #28a745, #20c997);
+                        color: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin-bottom: 30px;
+                        text-align: center;
+                    }}
+                    .visitor-info {{ 
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin-bottom: 30px;
+                        border-left: 5px solid #667eea;
+                    }}
+                    .experience-level {{
+                        display: inline-block;
+                        padding: 5px 15px;
+                        border-radius: 20px;
+                        font-size: 0.9rem;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }}
+                    .new-user {{ background: #28a745; color: white; }}
+                    .returning-user {{ background: #ffc107; color: #333; }}
+                    .returning-visitor {{ background: #17a2b8; color: white; }}
+                    
+                    .company-info {{ 
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 30px;
+                        margin-bottom: 30px;
+                    }}
+                    .info-card {{ 
+                        background: white;
+                        padding: 25px;
+                        border-radius: 10px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                        border-top: 4px solid #667eea;
+                    }}
+                    .info-card h3 {{ 
+                        color: #667eea;
+                        margin-bottom: 15px;
+                        font-size: 1.3rem;
+                    }}
+                    .services {{ 
+                        background: #f8f9fa;
+                        padding: 30px;
+                        border-radius: 10px;
+                        margin-bottom: 30px;
+                    }}
+                    .services h2 {{ 
+                        color: #667eea;
+                        margin-bottom: 20px;
+                        text-align: center;
+                    }}
+                    .service-grid {{ 
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                        gap: 20px;
+                    }}
+                    .service-item {{ 
+                        background: white;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+                        text-align: center;
+                    }}
+                    .service-item h4 {{ 
+                        color: #667eea;
+                        margin-bottom: 10px;
+                    }}
+                    .navigation {{ 
+                        text-align: center;
+                        margin-top: 30px;
+                        padding-top: 30px;
+                        border-top: 2px solid #eee;
+                    }}
+                    .nav-btn {{ 
+                        display: inline-block;
+                        background: #667eea;
+                        color: white;
+                        padding: 12px 25px;
+                        text-decoration: none;
+                        border-radius: 25px;
+                        margin: 10px;
+                        transition: all 0.3s ease;
+                        font-weight: bold;
+                    }}
+                    .nav-btn:hover {{ 
+                        background: #5a6fd8;
+                        transform: translateY(-2px);
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    }}
+                    .footer {{ 
+                        text-align: center;
+                        padding: 30px 0;
+                        color: #666;
+                        border-top: 2px solid #eee;
+                        margin-top: 30px;
+                    }}
+                    .privilege-badge {{
+                        display: inline-block;
+                        background: #ff6b6b;
+                        color: white;
+                        padding: 5px 12px;
+                        border-radius: 15px;
+                        font-size: 0.8rem;
+                        margin: 5px;
+                    }}
+                    .affiliation-section {{
+                        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                        color: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                    }}
+                    @media (max-width: 768px) {{
+                        .container {{ margin: 10px; padding: 15px; }}
+                        .logo {{ font-size: 2rem; }}
+                        .company-info {{ grid-template-columns: 1fr; }}
+                        .service-grid {{ grid-template-columns: 1fr; }}
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <!-- Header with Company Identity -->
+                    <div class="header">
+                        <div class="logo">Yourl.Cloud Inc.</div>
+                        <div class="tagline">Secure Cloud Infrastructure & API Services</div>
+                        <p>United States • Global Operations • Enterprise Solutions</p>
+                    </div>
+
+                    <!-- Success Banner for Authenticated Users -->
+                    <div class="success-banner">
+                        <h2>🎉 Welcome to Yourl.Cloud Inc.</h2>
+                        <p><strong>Authentication Successful</strong> - You now have access to our enhanced services.</p>
+                        <p>Experience Level: <span class="experience-level {experience_level}">{experience_level.replace('_', ' ').title()}</span></p>
+                    </div>
+
+                    <!-- Visitor Information Section -->
+                    <div class="visitor-info">
+                        <h3>👤 Your Visitor Profile</h3>
+                        <p><strong>Visitor ID:</strong> {visitor_data.get('visitor_id', 'Unknown')}</p>
+                        <p><strong>Total Visits:</strong> {visitor_data.get('total_visits', 1)}</p>
+                        <p><strong>Status:</strong> {'New Visitor' if visitor_data.get('is_new_visitor', True) else 'Returning Visitor'}</p>
+                        <p><strong>Code Usage:</strong> {'Has used access codes' if visitor_data.get('has_used_code', False) else 'First time using codes'}</p>
+                        {f'<p><strong>Tracking Key:</strong> {visitor_data.get("tracking_key")}</p>' if visitor_data.get('tracking_key') else ''}
+                    </div>
+
+                    <!-- Company Information for SEO -->
+                    <div class="company-info">
+                        <div class="info-card">
+                            <h3>🏢 About Yourl.Cloud Inc.</h3>
+                            <p>Yourl.Cloud Inc. is a leading technology company specializing in cloud infrastructure, API services, and digital solutions. Based in the United States, we serve clients globally with secure, scalable, and innovative technology solutions.</p>
+                            <p><strong>Founded:</strong> 2024</p>
+                            <p><strong>Headquarters:</strong> United States</p>
+                            <p><strong>Industry:</strong> Cloud Computing, API Services, Digital Infrastructure</p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>🌐 Global Operations</h3>
+                            <p>Operating from the United States, Yourl.Cloud Inc. provides services to clients worldwide. Our infrastructure spans multiple regions, ensuring reliable, low-latency access to our services.</p>
+                            <p><strong>Primary Region:</strong> US-West1 (Google Cloud)</p>
+                            <p><strong>Service Availability:</strong> 24/7 Global Access</p>
+                            <p><strong>Compliance:</strong> US-based data centers</p>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h3>🔒 Security & Compliance</h3>
+                            <p>Yourl.Cloud Inc. maintains the highest standards of security and compliance. Our infrastructure is built on Google Cloud Platform, ensuring enterprise-grade security, reliability, and performance.</p>
+                            <p><strong>Infrastructure:</strong> Google Cloud Platform</p>
+                            <p><strong>Security:</strong> Enterprise-grade encryption</p>
+                            <p><strong>Compliance:</strong> Industry-standard protocols</p>
+                        </div>
+                    </div>
+
+                    <!-- Services Section -->
+                    <div class="services">
+                        <h2>🚀 Our Services</h2>
+                        <div class="service-grid">
+                            <div class="service-item">
+                                <h4>☁️ Cloud Infrastructure</h4>
+                                <p>Scalable cloud solutions built on Google Cloud Platform, providing reliable and secure infrastructure for modern applications.</p>
+                            </div>
+                            <div class="service-item">
+                                <h4>🔌 API Services</h4>
+                                <p>RESTful API services with comprehensive documentation, authentication, and monitoring capabilities.</p>
+                            </div>
+                            <div class="service-item">
+                                <h4>🛡️ Security Solutions</h4>
+                                <p>Enterprise-grade security with encryption, authentication, and compliance features for sensitive data handling.</p>
+                            </div>
+                            <div class="service-item">
+                                <h4>📊 Analytics & Monitoring</h4>
+                                <p>Real-time monitoring, analytics, and insights to optimize performance and user experience.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privileges & Affiliations Section -->
+                    <div class="affiliation-section">
+                        <h3>🎯 Your Privileges & Affiliations</h3>
+                        <p>Based on your authentication and visit history, you have access to the following privileges:</p>
+                        
+                        <div class="privilege-badge">✅ Authenticated User</div>
+                        <div class="privilege-badge">✅ API Access</div>
+                        <div class="privilege-badge">✅ Service Monitoring</div>
+                        <div class="privilege-badge">✅ Technical Support</div>
+                        
+                        {f'<div class="privilege-badge">✅ Returning Customer</div>' if not visitor_data.get('is_new_visitor', True) else ''}
+                        {f'<div class="privilege-badge">✅ Code History Access</div>' if visitor_data.get('has_used_code', False) else ''}
+                        
+                        <p style="margin-top: 15px;"><strong>Access Level:</strong> {experience_level.replace('_', ' ').title()}</p>
+                        <p><strong>Build Version:</strong> {build_version}</p>
+                        <p><strong>Current Marketing Code:</strong> {current_password}</p>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="navigation">
+                        <a href="/" class="nav-btn">🏠 Back to Landing Page</a>
+                        <a href="/api" class="nav-btn">🔌 API Documentation</a>
+                        <a href="/status" class="nav-btn">📊 Service Status</a>
+                        <a href="/health" class="nav-btn">❤️ Health Check</a>
+                    </div>
+
+                    <!-- Footer with Legal Information -->
+                    <div class="footer">
+                        <p><strong>Yourl.Cloud Inc.</strong> - Cloud Infrastructure & API Services</p>
+                        <p>United States • Global Operations • Enterprise Solutions</p>
+                        <p>© 2024 Yourl.Cloud Inc. All rights reserved.</p>
+                        <p>Built on Google Cloud Platform • Secure • Scalable • Reliable</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            response = make_response(html_content)
             
             # Set visitor cookie if not already set
             if not request.cookies.get('visitor_id'):
