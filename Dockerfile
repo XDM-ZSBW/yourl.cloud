@@ -32,4 +32,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Run the application with WSGI server for production
 # Use gunicorn for better performance and Cloud Run compatibility
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--timeout", "120", "--keep-alive", "2", "wsgi:app"]
+CMD ["python", "app.py"]
