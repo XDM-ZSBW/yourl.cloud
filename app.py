@@ -134,6 +134,18 @@ def get_current_marketing_password():
         
         if current_code:
             print(f"✅ Using Secret Manager current code: {current_code}")
+            
+            # Log to database if available
+            try:
+                database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
+                if database_connection:
+                    from scripts.database_client import DatabaseClient
+                    db_client = DatabaseClient(database_connection)
+                    db_client.log_usage(current_code, request.headers.get('User-Agent'), 
+                                      get_client_ip(), '/', True)
+            except Exception as e:
+                print(f"⚠️ Database logging failed: {e}")
+            
             return current_code
         else:
             print("⚠️ No current code found in Secret Manager")
@@ -408,6 +420,18 @@ def main_endpoint():
         if password == current_password:
             # Get the next code for authenticated users (Cursor ownership)
             next_password = get_next_marketing_password()
+            
+            # Log successful authentication to database if available
+            try:
+                database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
+                if database_connection:
+                    from scripts.database_client import DatabaseClient
+                    db_client = DatabaseClient(database_connection)
+                    db_client.log_usage(current_password, request.headers.get('User-Agent'), 
+                                      get_client_ip(), '/auth', True)
+            except Exception as e:
+                print(f"⚠️ Database logging failed: {e}")
+            
             return jsonify({
                 "status": "authenticated",
                 "message": "🎉 Welcome to Yourl.Cloud API! Marketing password accepted!",
@@ -424,6 +448,17 @@ def main_endpoint():
                 }
             })
         else:
+            # Log failed authentication attempt to database if available
+            try:
+                database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
+                if database_connection:
+                    from scripts.database_client import DatabaseClient
+                    db_client = DatabaseClient(database_connection)
+                    db_client.log_usage(current_password, request.headers.get('User-Agent'), 
+                                      get_client_ip(), '/auth', False)
+            except Exception as e:
+                print(f"⚠️ Database logging failed: {e}")
+            
             return f"""
             <!DOCTYPE html>
             <html>
