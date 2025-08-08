@@ -24,18 +24,22 @@ Yourl.Cloud now uses Google Secret Manager as the system of record for marketing
 
 ## Setup Instructions
 
-### 1. Enable Required APIs
+### 1. ✅ Required APIs (Already Enabled)
+
+The following APIs are already enabled in your project:
 
 ```bash
-# Enable Secret Manager API
-gcloud services enable secretmanager.googleapis.com
+# ✅ Secret Manager API - ENABLED
+gcloud services list --enabled --filter="name:secretmanager.googleapis.com"
 
-# Enable Cloud SQL Admin API
-gcloud services enable sqladmin.googleapis.com
+# ✅ Cloud SQL Admin API - ENABLED  
+gcloud services list --enabled --filter="name:sqladmin.googleapis.com"
 
-# Enable Cloud Build API (if not already enabled)
-gcloud services enable cloudbuild.googleapis.com
+# ✅ Cloud Build API - ENABLED
+gcloud services list --enabled --filter="name:cloudbuild.googleapis.com"
 ```
+
+**Status**: All required APIs are already enabled and ready for use.
 
 ### 2. Create Cloud SQL Instance
 

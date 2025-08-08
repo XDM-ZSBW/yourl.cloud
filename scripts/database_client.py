@@ -2,6 +2,7 @@
 """
 Cloud SQL Database Client for Yourl.Cloud Marketing Codes
 Handles persistent storage of code history, usage logs, and authorization records
+Uses secure connection manager for Secret Manager-based credentials
 """
 
 import os
@@ -17,14 +18,32 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class DatabaseClient:
-    def __init__(self, connection_string: str):
+    def __init__(self, project_id: str = None, connection_string: str = None):
+        """
+        Initialize database client with either project_id (for Secret Manager) or connection_string
+        """
+        self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud')
         self.connection_string = connection_string
         self._ensure_tables()
     
     def _get_connection(self):
-        """Get a database connection"""
+        """Get a database connection using secure credentials"""
         try:
-            conn = psycopg2.connect(self.connection_string)
+            if self.connection_string:
+                # Use provided connection string (for backward compatibility)
+                conn = psycopg2.connect(self.connection_string)
+            else:
+                # Use Secret Manager for credentials
+                from scripts.database_connection_manager import DatabaseConnectionManager
+                connection_manager = DatabaseConnectionManager(self.project_id)
+                connection_string = connection_manager.get_connection_string()
+                
+                if not connection_string:
+                    logger.error("Failed to get connection string from Secret Manager")
+                    return None
+                
+                conn = psycopg2.connect(connection_string)
+            
             return conn
         except Exception as e:
             logger.error(f"Database connection error: {e}")

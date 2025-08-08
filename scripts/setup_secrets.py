@@ -30,9 +30,19 @@ def setup_secret_manager(project_id, service_account_id):
     """
     print("\n=== Setting up Google Cloud Secret Manager ===\n")
     
-    # Enable Secret Manager API
-    print("Enabling Secret Manager API...")
-    run_command(f"gcloud services enable secretmanager.googleapis.com --project={project_id}")
+    # Check if Secret Manager API is already enabled
+    print("Checking Secret Manager API status...")
+    result = run_command(
+        f"gcloud services list --enabled --filter=\"name:secretmanager.googleapis.com\" --project={project_id}",
+        check=False
+    )
+    
+    if result and "secretmanager.googleapis.com" in result:
+        print("✅ Secret Manager API is already enabled")
+    else:
+        print("Enabling Secret Manager API...")
+        run_command(f"gcloud services enable secretmanager.googleapis.com --project={project_id}")
+        print("✅ Secret Manager API enabled")
     
     # Create service account if it doesn't exist
     print("\nCreating service account...")

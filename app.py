@@ -1350,8 +1350,8 @@ def guard_status():
 @app.route('/data', methods=['GET'])
 def data_stream():
     """
-    Data stream endpoint providing vertical linear datastream with horizontally scrollable wiki stories.
-    Each frame represents a story interpretation of the vertical scroll area.
+    Enhanced data stream endpoint providing vertical linear datastream with horizontally scrollable wiki stories.
+    Each frame represents a story interpretation of the vertical scroll area with mind map navigation.
     Only accessible to authenticated users who have previously used a valid code.
     """
     # Get visitor data for personalization
@@ -1359,7 +1359,7 @@ def data_stream():
     
     # Check if visitor has authenticated (used a valid code previously)
     if not visitor_data.get('has_used_code', False):
-        return make_response("""
+        return make_response(f"""
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -1367,7 +1367,7 @@ def data_stream():
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Access Denied - Data Stream</title>
             <style>
-                body { 
+                body {{ 
                     font-family: 'Courier New', monospace;
                     background: #000;
                     color: #ff0000;
@@ -1376,24 +1376,24 @@ def data_stream():
                     align-items: center;
                     min-height: 100vh;
                     margin: 0;
-                }
-                .access-denied {
+                }}
+                .access-denied {{
                     text-align: center;
                     padding: 40px;
                     border: 2px solid #ff0000;
                     border-radius: 10px;
                     background: rgba(255, 0, 0, 0.1);
-                }
-                .error-code {
+                }}
+                .error-code {{
                     font-size: 3rem;
                     margin-bottom: 20px;
                     text-shadow: 0 0 20px #ff0000;
-                }
-                .message {
+                }}
+                .message {{
                     font-size: 1.2rem;
                     margin-bottom: 30px;
-                }
-                .nav-btn {
+                }}
+                .nav-btn {{
                     display: inline-block;
                     padding: 10px 20px;
                     background: #ff0000;
@@ -1402,11 +1402,11 @@ def data_stream():
                     border-radius: 5px;
                     font-weight: bold;
                     margin: 10px;
-                }
-                .nav-btn:hover {
+                }}
+                .nav-btn:hover {{
                     background: #cc0000;
                     color: #fff;
-                }
+                }}
             </style>
         </head>
         <body>
@@ -1432,7 +1432,7 @@ def data_stream():
     import time
     current_time = time.time()
     
-    # Create story frames with wiki interpretations
+    # Create comprehensive story frames with wiki interpretations
     story_frames = [
         {
             "id": "frame_001",
@@ -1441,7 +1441,9 @@ def data_stream():
             "content": "In the vast expanse of the digital realm, Yourl.Cloud Inc. emerged as a beacon of innovation. The story begins with a simple idea: to bridge the gap between human potential and technological possibility.",
             "category": "origin_story",
             "visual_elements": ["mountain_peak", "digital_landscape", "beacon_light"],
-            "scroll_position": 0
+            "scroll_position": 0,
+            "wiki_links": ["ARCHITECTURE_OVERVIEW.md", "Home.md"],
+            "mind_map_nodes": ["business", "technology", "innovation"]
         },
         {
             "id": "frame_002", 
@@ -1450,7 +1452,9 @@ def data_stream():
             "content": "Every line of code tells a story. In the depths of the API, algorithms dance with data, creating symphonies of information that power the modern world. This is where magic meets mathematics.",
             "category": "technical_evolution",
             "visual_elements": ["code_stream", "algorithm_flow", "data_symphony"],
-            "scroll_position": 100
+            "scroll_position": 100,
+            "wiki_links": ["SECRET_MANAGER_INTEGRATION.md", "COST_EFFECTIVE_MARKETING_CODES.md"],
+            "mind_map_nodes": ["code", "algorithms", "data"]
         },
         {
             "id": "frame_003",
@@ -1459,7 +1463,9 @@ def data_stream():
             "content": f"Visitor {visitor_data.get('visitor_id', 'Unknown')} embarked on a digital pilgrimage. Their path through the virtual landscape reveals patterns of human-computer interaction that shape the future of technology.",
             "category": "user_experience",
             "visual_elements": ["digital_path", "interaction_patterns", "future_vision"],
-            "scroll_position": 200
+            "scroll_position": 200,
+            "wiki_links": ["WIKI_UPDATE_SYSTEM.md", "STATUS.md"],
+            "mind_map_nodes": ["user", "experience", "interaction"]
         },
         {
             "id": "frame_004",
@@ -1468,7 +1474,9 @@ def data_stream():
             "content": "In the silent halls of Google Cloud, servers hum with purpose. Each request, each response, each authentication creates ripples in the digital fabric that connects us all.",
             "category": "infrastructure",
             "visual_elements": ["server_halls", "digital_ripples", "connection_web"],
-            "scroll_position": 300
+            "scroll_position": 300,
+            "wiki_links": ["CLOUD_RUN_DOMAIN_MAPPING.md", "DEPLOYMENT_SUMMARY.md"],
+            "mind_map_nodes": ["cloud", "infrastructure", "servers"]
         },
         {
             "id": "frame_005",
@@ -1477,7 +1485,9 @@ def data_stream():
             "content": "Here and now, in this exact moment, technology and humanity converge. The story continues to unfold, written in real-time by every interaction, every decision, every digital breath.",
             "category": "current_state",
             "visual_elements": ["convergence_point", "real_time_story", "digital_breath"],
-            "scroll_position": 400
+            "scroll_position": 400,
+            "wiki_links": ["KNOWLEDGE_HUB.md", "ARCHITECTURE_OVERVIEW.md"],
+            "mind_map_nodes": ["present", "convergence", "real-time"]
         }
     ]
     
@@ -1490,7 +1500,9 @@ def data_stream():
             "content": f"This visitor has walked the path of authentication. Their journey through the digital landscape has granted them access to deeper layers of the story, revealing secrets hidden in plain sight.",
             "category": "personal_privilege",
             "visual_elements": ["authenticated_path", "hidden_secrets", "deeper_layers"],
-            "scroll_position": 500
+            "scroll_position": 500,
+            "wiki_links": ["SECURITY.md", "SECURITY_CHECKLIST.md"],
+            "mind_map_nodes": ["authentication", "security", "access"]
         })
     
     if visitor_data.get('total_visits', 1) > 1:
@@ -1501,10 +1513,31 @@ def data_stream():
             "content": f"Like a traveler returning to familiar lands, this visitor has walked these digital paths before. Their {visitor_data.get('total_visits', 1)} visits have woven them into the fabric of this digital story.",
             "category": "returning_visitor",
             "visual_elements": ["familiar_lands", "woven_fabric", "digital_story"],
-            "scroll_position": 600
+            "scroll_position": 600,
+            "wiki_links": ["WIKI_UPDATE_SUMMARY.md", "BETA_LAUNCH_SUMMARY.md"],
+            "mind_map_nodes": ["returning", "familiarity", "history"]
         })
     
-    # Create the HTML response with vertical datastream
+    # Add knowledge hub frame
+    story_frames.append({
+        "id": "frame_knowledge",
+        "timestamp": current_time + 180,
+        "title": "The Knowledge Hub",
+        "content": "At the heart of this digital ecosystem lies the Knowledge Hub - a comprehensive repository of wisdom, experience, and insights that guides every decision and shapes every interaction.",
+        "category": "knowledge_management",
+        "visual_elements": ["knowledge_hub", "wisdom_repository", "insight_ecosystem"],
+        "scroll_position": 700,
+        "wiki_links": ["KNOWLEDGE_HUB.md", "WIKI_UPDATE_SYSTEM.md"],
+        "mind_map_nodes": ["knowledge", "wisdom", "insights"]
+    })
+    
+    # Create the enhanced HTML response with vertical datastream and mind map
+    # Generate mind map nodes HTML
+    mind_map_nodes_html = ""
+    for frame in story_frames:
+        for node in frame.get('mind_map_nodes', []):
+            mind_map_nodes_html += f'<div class="mind-map-node" onclick="filterByNode(\'{node}\')">{node.replace("_", " ").title()}</div>'
+    
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -1538,6 +1571,7 @@ def data_stream():
                 border-radius: 10px;
                 position: relative;
                 overflow: hidden;
+                transition: all 0.3s ease;
             }}
             .frame::before {{
                 content: '';
@@ -1546,56 +1580,59 @@ def data_stream():
                 left: 0;
                 right: 0;
                 height: 2px;
-                background: linear-gradient(90deg, transparent, #00ff00, transparent);
-                animation: scan 2s linear infinite;
+                background: linear-gradient(90deg, #00ff00, #00aa00, #00ff00);
+                animation: pulse 2s infinite;
             }}
-            @keyframes scan {{
-                0% {{ transform: translateX(-100%); }}
-                100% {{ transform: translateX(100%); }}
+            @keyframes pulse {{
+                0% {{ opacity: 0.5; }}
+                50% {{ opacity: 1; }}
+                100% {{ opacity: 0.5; }}
+            }}
+            .frame:hover {{
+                background: rgba(0, 255, 0, 0.1);
+                transform: scale(1.02);
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
             }}
             .frame-header {{
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
                 padding-bottom: 10px;
-                border-bottom: 1px solid #00ff00;
+                border-bottom: 1px solid rgba(0, 255, 0, 0.3);
             }}
             .frame-id {{
-                font-size: 0.9rem;
+                font-weight: bold;
                 color: #00aa00;
             }}
             .frame-timestamp {{
+                font-size: 0.9rem;
+                color: #00aa00;
+            }}
+            .frame-category {{
+                display: inline-block;
+                padding: 5px 10px;
+                background: rgba(0, 255, 0, 0.2);
+                border: 1px solid #00ff00;
+                border-radius: 5px;
                 font-size: 0.8rem;
-                color: #008800;
+                margin-bottom: 10px;
             }}
             .frame-title {{
                 font-size: 1.5rem;
                 font-weight: bold;
                 margin-bottom: 15px;
                 color: #00ff00;
-                text-shadow: 0 0 10px #00ff00;
             }}
             .frame-content {{
-                font-size: 1rem;
                 line-height: 1.6;
                 margin-bottom: 20px;
             }}
-            .frame-category {{
-                display: inline-block;
-                padding: 5px 15px;
-                background: #00ff00;
-                color: #000;
-                border-radius: 15px;
-                font-size: 0.8rem;
-                font-weight: bold;
-                margin-bottom: 15px;
-            }}
             .visual-elements {{
                 display: flex;
-                gap: 10px;
                 flex-wrap: wrap;
-                margin-top: 15px;
+                gap: 10px;
+                margin-bottom: 15px;
             }}
             .visual-element {{
                 padding: 5px 10px;
@@ -1604,10 +1641,65 @@ def data_stream():
                 border-radius: 5px;
                 font-size: 0.8rem;
             }}
-            .scroll-indicator {{
+            .wiki-links {{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid rgba(0, 255, 0, 0.3);
+            }}
+            .wiki-link {{
+                padding: 5px 10px;
+                background: rgba(0, 255, 0, 0.1);
+                border: 1px solid #00ff00;
+                border-radius: 5px;
+                font-size: 0.8rem;
+                text-decoration: none;
+                color: #00ff00;
+                transition: all 0.3s ease;
+            }}
+            .wiki-link:hover {{
+                background: rgba(0, 255, 0, 0.3);
+                transform: scale(1.05);
+            }}
+            .mind-map {{
                 position: fixed;
                 top: 20px;
                 right: 20px;
+                width: 300px;
+                height: 400px;
+                background: rgba(0, 0, 0, 0.9);
+                border: 1px solid #00ff00;
+                border-radius: 10px;
+                padding: 15px;
+                z-index: 1000;
+            }}
+            .mind-map-title {{
+                text-align: center;
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+                color: #00ff00;
+            }}
+            .mind-map-node {{
+                display: inline-block;
+                padding: 5px 10px;
+                background: rgba(0, 255, 0, 0.2);
+                border: 1px solid #00ff00;
+                border-radius: 5px;
+                font-size: 0.8rem;
+                margin: 5px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }}
+            .mind-map-node:hover {{
+                background: rgba(0, 255, 0, 0.4);
+                transform: scale(1.1);
+            }}
+            .scroll-indicator {{
+                position: fixed;
+                top: 20px;
+                left: 20px;
                 background: rgba(0, 0, 0, 0.8);
                 padding: 10px;
                 border: 1px solid #00ff00;
@@ -1629,10 +1721,12 @@ def data_stream():
                 text-decoration: none;
                 border-radius: 5px;
                 font-weight: bold;
+                transition: all 0.3s ease;
             }}
             .nav-btn:hover {{
                 background: #00aa00;
                 color: #fff;
+                transform: scale(1.05);
             }}
             .visitor-info {{
                 position: fixed;
@@ -1651,6 +1745,11 @@ def data_stream():
                 color: #00ff00;
                 text-shadow: 0 0 20px #00ff00;
             }}
+            .mind-map-container {{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }}
         </style>
     </head>
     <body>
@@ -1662,16 +1761,24 @@ def data_stream():
             <p><strong>Code Usage:</strong> {'Yes' if visitor_data.get('has_used_code', False) else 'No'}</p>
         </div>
         
+        <div class="mind-map">
+            <div class="mind-map-title">🧠 Mind Map</div>
+            <div class="mind-map-container">
+                {mind_map_nodes_html}
+            </div>
+        </div>
+        
         <div class="scroll-indicator">
             <p><strong>Scroll Position:</strong> <span id="scrollPos">0</span></p>
             <p><strong>Frames:</strong> {len(story_frames)}</p>
+            <p><strong>Categories:</strong> {len(set(frame['category'] for frame in story_frames))}</p>
         </div>
         
         <div class="datastream-container">
             <div class="data-stream-title">📊 VERTICAL LINEAR DATASTREAM</div>
             
             {''.join([f'''
-            <div class="frame" data-scroll="{frame['scroll_position']}">
+            <div class="frame" data-scroll="{frame['scroll_position']}" data-category="{frame['category']}" data-nodes="{','.join(frame.get('mind_map_nodes', []))}">
                 <div class="frame-header">
                     <span class="frame-id">{frame['id']}</span>
                     <span class="frame-timestamp">{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(frame['timestamp']))}</span>
@@ -1682,6 +1789,9 @@ def data_stream():
                 <div class="visual-elements">
                     {''.join([f'<span class="visual-element">{element.replace("_", " ").title()}</span>' for element in frame['visual_elements']])}
                 </div>
+                <div class="wiki-links">
+                    {''.join([f'<a href="/wiki/{link}" class="wiki-link" target="_blank">📚 {link.replace(".md", "").replace("_", " ").title()}</a>' for link in frame.get('wiki_links', [])])}
+                </div>
             </div>
             ''' for frame in story_frames])}
         </div>
@@ -1690,6 +1800,7 @@ def data_stream():
             <a href="/" class="nav-btn">🏠 Home</a>
             <a href="/api" class="nav-btn">🔌 API</a>
             <a href="/status" class="nav-btn">📊 Status</a>
+            <a href="/wiki/KNOWLEDGE_HUB.md" class="nav-btn" target="_blank">🧠 Knowledge Hub</a>
         </div>
         
         <script>
@@ -1711,6 +1822,20 @@ def data_stream():
                 }});
             }});
             
+            // Mind map filtering
+            function filterByNode(node) {{
+                const frames = document.querySelectorAll('.frame');
+                frames.forEach(frame => {{
+                    const nodes = frame.dataset.nodes.split(',');
+                    if (nodes.includes(node)) {{
+                        frame.style.display = 'block';
+                        frame.style.opacity = '1';
+                    }} else {{
+                        frame.style.opacity = '0.3';
+                    }}
+                }});
+            }}
+            
             // Auto-scroll animation
             let scrollSpeed = 0.5;
             function autoScroll() {{
@@ -1722,6 +1847,24 @@ def data_stream():
             setTimeout(() => {{
                 autoScroll();
             }}, 3000);
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {{
+                switch(e.key) {{
+                    case 'ArrowUp':
+                        window.scrollBy(0, -100);
+                        break;
+                    case 'ArrowDown':
+                        window.scrollBy(0, 100);
+                        break;
+                    case 'Home':
+                        window.scrollTo(0, 0);
+                        break;
+                    case 'End':
+                        window.scrollTo(0, document.body.scrollHeight);
+                        break;
+                }}
+            }});
         </script>
     </body>
     </html>
@@ -1859,3 +2002,4 @@ if __name__ == '__main__':
     
     # Start with production WSGI server
     start_production_server()
+
