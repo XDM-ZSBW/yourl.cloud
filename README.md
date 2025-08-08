@@ -32,6 +32,79 @@ A self-executing Python Flask application that responds with the request URL and
 
 4. **Access the API**: http://localhost:8080
 
+### Local Files Management
+
+#### Files to Keep Local
+
+The following files and directories should never be committed to version control:
+
+1. **Environment Files**
+   - `.env` - Local environment variables
+   - `*.env` - Any environment-specific configurations
+   - `.env.local` - Local-only environment settings
+
+2. **Cache and Temporary Files**
+   - `__pycache__/` - Python bytecode cache
+   - `*.pyc` - Compiled Python files
+   - `*.pyo` - Optimized Python files
+   - `.pytest_cache/` - pytest cache directory
+   - `tmp/` - Temporary files directory
+
+3. **IDE and Editor Files**
+   - `.vscode/` - VS Code settings (unless shared team configuration)
+   - `.idea/` - PyCharm settings
+   - `*.swp` - Vim swap files
+   - `*.swo` - Vim swap files
+   - `*.swn` - Vim swap files
+
+4. **Local Development Files**
+   - `local_settings.py` - Local Django/Flask settings
+   - `local_config.json` - Local configuration files
+   - `debug.log` - Debug log files
+   - `*.log` - Any log files
+
+5. **Security and Sensitive Data**
+   - `secrets/` - Directory containing secrets
+   - `credentials/` - Directory containing credentials
+   - `*.key` - Key files
+   - `*.pem` - Certificate files
+   - `*.crt` - Certificate files
+
+#### Best Practices
+
+1. **Environment Variables**
+   - Always use `.env` for local environment variables
+   - Keep a `.env.example` in the repository as a template
+   - Document all required environment variables
+
+2. **Configuration Management**
+   - Use relative paths in configuration files
+   - Keep instance-specific settings in local files
+   - Use environment variables for sensitive data
+
+3. **IDE Settings**
+   - Only commit shared team settings
+   - Keep personal preferences local
+   - Use `.gitignore` for IDE-specific files
+
+4. **Security**
+   - Never commit API keys or secrets
+   - Use environment variables for sensitive data
+   - Keep security certificates local
+
+5. **Development Tools**
+   - Keep build artifacts local
+   - Don't commit dependency directories
+   - Use virtual environments for Python
+
+#### VS Code Configuration
+
+For VS Code users, maintain these settings locally:
+- `settings.json` - Personal preferences
+- `launch.json` - Debug configurations
+- `tasks.json` - Build tasks
+- `extensions.json` - Recommended extensions
+
 ### Production Deployment
 
 **All instances deploy as production instances** - the tester decides the usage context:

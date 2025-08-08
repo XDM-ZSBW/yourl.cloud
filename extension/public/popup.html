@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yourl.Cloud Assistant</title>
+  <style>
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header img {
+      width: 24px;
+      height: 24px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      color: #333;
+    }
+    .button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .status {
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="icons/icon48.png" alt="Yourl.Cloud">
+      <h1>Yourl.Cloud Assistant</h1>
+    </div>
+    
+    <div id="codeSection" style="display: none;">
+      <p>Current Code: <strong id="currentCode"></strong></p>
+      <button class="button" id="copyCode">Copy Code</button>
+    </div>
+
+    <div id="recoverySection">
+      <button class="button" id="recoverCode">Recover Code</button>
+      <div id="recoveryStatus" class="status" style="display: none;"></div>
+    </div>
+
+    <div id="actionSection">
+      <button class="button" id="goToHome">Go to Yourl.Cloud</button>
+    </div>
+  </div>
+  <script src="../src/popup.js"></script>
+</body>
+</html>
+
