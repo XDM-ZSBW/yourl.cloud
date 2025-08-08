@@ -1250,6 +1250,316 @@ def guard_status():
         "timestamp": datetime.utcnow().isoformat()
     })
 
+@app.route('/data', methods=['GET'])
+def data_stream():
+    """
+    Data stream endpoint providing vertical linear datastream with horizontally scrollable wiki stories.
+    Each frame represents a story interpretation of the vertical scroll area.
+    """
+    # Get visitor data for personalization
+    visitor_data = get_visitor_data()
+    
+    # Generate dynamic story frames based on current time and visitor data
+    import time
+    current_time = time.time()
+    
+    # Create story frames with wiki interpretations
+    story_frames = [
+        {
+            "id": "frame_001",
+            "timestamp": current_time - 3600,  # 1 hour ago
+            "title": "The Digital Frontier",
+            "content": "In the vast expanse of the digital realm, Yourl.Cloud Inc. emerged as a beacon of innovation. The story begins with a simple idea: to bridge the gap between human potential and technological possibility.",
+            "category": "origin_story",
+            "visual_elements": ["mountain_peak", "digital_landscape", "beacon_light"],
+            "scroll_position": 0
+        },
+        {
+            "id": "frame_002", 
+            "timestamp": current_time - 1800,  # 30 minutes ago
+            "title": "The Code That Speaks",
+            "content": "Every line of code tells a story. In the depths of the API, algorithms dance with data, creating symphonies of information that power the modern world. This is where magic meets mathematics.",
+            "category": "technical_evolution",
+            "visual_elements": ["code_stream", "algorithm_flow", "data_symphony"],
+            "scroll_position": 100
+        },
+        {
+            "id": "frame_003",
+            "timestamp": current_time - 900,  # 15 minutes ago
+            "title": "The Visitor's Journey",
+            "content": f"Visitor {visitor_data.get('visitor_id', 'Unknown')} embarked on a digital pilgrimage. Their path through the virtual landscape reveals patterns of human-computer interaction that shape the future of technology.",
+            "category": "user_experience",
+            "visual_elements": ["digital_path", "interaction_patterns", "future_vision"],
+            "scroll_position": 200
+        },
+        {
+            "id": "frame_004",
+            "timestamp": current_time - 300,  # 5 minutes ago
+            "title": "The Cloud's Whisper",
+            "content": "In the silent halls of Google Cloud, servers hum with purpose. Each request, each response, each authentication creates ripples in the digital fabric that connects us all.",
+            "category": "infrastructure",
+            "visual_elements": ["server_halls", "digital_ripples", "connection_web"],
+            "scroll_position": 300
+        },
+        {
+            "id": "frame_005",
+            "timestamp": current_time,
+            "title": "The Present Moment",
+            "content": "Here and now, in this exact moment, technology and humanity converge. The story continues to unfold, written in real-time by every interaction, every decision, every digital breath.",
+            "category": "current_state",
+            "visual_elements": ["convergence_point", "real_time_story", "digital_breath"],
+            "scroll_position": 400
+        }
+    ]
+    
+    # Add personalized frames based on visitor data
+    if visitor_data.get('has_used_code', False):
+        story_frames.append({
+            "id": "frame_personal",
+            "timestamp": current_time + 60,
+            "title": "The Authenticated Path",
+            "content": f"This visitor has walked the path of authentication. Their journey through the digital landscape has granted them access to deeper layers of the story, revealing secrets hidden in plain sight.",
+            "category": "personal_privilege",
+            "visual_elements": ["authenticated_path", "hidden_secrets", "deeper_layers"],
+            "scroll_position": 500
+        })
+    
+    if visitor_data.get('total_visits', 1) > 1:
+        story_frames.append({
+            "id": "frame_returning",
+            "timestamp": current_time + 120,
+            "title": "The Returning Wanderer",
+            "content": f"Like a traveler returning to familiar lands, this visitor has walked these digital paths before. Their {visitor_data.get('total_visits', 1)} visits have woven them into the fabric of this digital story.",
+            "category": "returning_visitor",
+            "visual_elements": ["familiar_lands", "woven_fabric", "digital_story"],
+            "scroll_position": 600
+        })
+    
+    # Create the HTML response with vertical datastream
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Data Stream - Yourl.Cloud Inc.</title>
+        <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            body {{ 
+                font-family: 'Courier New', monospace;
+                background: #000;
+                color: #00ff00;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }}
+            .datastream-container {{
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                width: max-content;
+                padding: 20px;
+            }}
+            .frame {{
+                width: 800px;
+                min-height: 300px;
+                margin: 20px 0;
+                padding: 30px;
+                background: rgba(0, 255, 0, 0.05);
+                border: 1px solid #00ff00;
+                border-radius: 10px;
+                position: relative;
+                overflow: hidden;
+            }}
+            .frame::before {{
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, transparent, #00ff00, transparent);
+                animation: scan 2s linear infinite;
+            }}
+            @keyframes scan {{
+                0% {{ transform: translateX(-100%); }}
+                100% {{ transform: translateX(100%); }}
+            }}
+            .frame-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #00ff00;
+            }}
+            .frame-id {{
+                font-size: 0.9rem;
+                color: #00aa00;
+            }}
+            .frame-timestamp {{
+                font-size: 0.8rem;
+                color: #008800;
+            }}
+            .frame-title {{
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin-bottom: 15px;
+                color: #00ff00;
+                text-shadow: 0 0 10px #00ff00;
+            }}
+            .frame-content {{
+                font-size: 1rem;
+                line-height: 1.6;
+                margin-bottom: 20px;
+            }}
+            .frame-category {{
+                display: inline-block;
+                padding: 5px 15px;
+                background: #00ff00;
+                color: #000;
+                border-radius: 15px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                margin-bottom: 15px;
+            }}
+            .visual-elements {{
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-top: 15px;
+            }}
+            .visual-element {{
+                padding: 5px 10px;
+                background: rgba(0, 255, 0, 0.2);
+                border: 1px solid #00ff00;
+                border-radius: 5px;
+                font-size: 0.8rem;
+            }}
+            .scroll-indicator {{
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 10px;
+                border: 1px solid #00ff00;
+                border-radius: 5px;
+                font-size: 0.9rem;
+            }}
+            .navigation {{
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 10px;
+            }}
+            .nav-btn {{
+                padding: 10px 20px;
+                background: #00ff00;
+                color: #000;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+            }}
+            .nav-btn:hover {{
+                background: #00aa00;
+                color: #fff;
+            }}
+            .visitor-info {{
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 15px;
+                border: 1px solid #00ff00;
+                border-radius: 5px;
+                font-size: 0.9rem;
+            }}
+            .data-stream-title {{
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 30px;
+                color: #00ff00;
+                text-shadow: 0 0 20px #00ff00;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="visitor-info">
+            <h3>👤 Visitor Data</h3>
+            <p><strong>ID:</strong> {visitor_data.get('visitor_id', 'Unknown')}</p>
+            <p><strong>Visits:</strong> {visitor_data.get('total_visits', 1)}</p>
+            <p><strong>Status:</strong> {'Returning' if not visitor_data.get('is_new_visitor', True) else 'New'}</p>
+            <p><strong>Code Usage:</strong> {'Yes' if visitor_data.get('has_used_code', False) else 'No'}</p>
+        </div>
+        
+        <div class="scroll-indicator">
+            <p><strong>Scroll Position:</strong> <span id="scrollPos">0</span></p>
+            <p><strong>Frames:</strong> {len(story_frames)}</p>
+        </div>
+        
+        <div class="datastream-container">
+            <div class="data-stream-title">📊 VERTICAL LINEAR DATASTREAM</div>
+            
+            {''.join([f'''
+            <div class="frame" data-scroll="{frame['scroll_position']}">
+                <div class="frame-header">
+                    <span class="frame-id">{frame['id']}</span>
+                    <span class="frame-timestamp">{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(frame['timestamp']))}</span>
+                </div>
+                <div class="frame-category">{frame['category'].replace('_', ' ').title()}</div>
+                <div class="frame-title">{frame['title']}</div>
+                <div class="frame-content">{frame['content']}</div>
+                <div class="visual-elements">
+                    {''.join([f'<span class="visual-element">{element.replace("_", " ").title()}</span>' for element in frame['visual_elements']])}
+                </div>
+            </div>
+            ''' for frame in story_frames])}
+        </div>
+        
+        <div class="navigation">
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="/api" class="nav-btn">🔌 API</a>
+            <a href="/status" class="nav-btn">📊 Status</a>
+        </div>
+        
+        <script>
+            // Update scroll position indicator
+            window.addEventListener('scroll', function() {{
+                document.getElementById('scrollPos').textContent = Math.round(window.scrollY);
+            }});
+            
+            // Add hover effects to frames
+            document.querySelectorAll('.frame').forEach(frame => {{
+                frame.addEventListener('mouseenter', function() {{
+                    this.style.background = 'rgba(0, 255, 0, 0.1)';
+                    this.style.transform = 'scale(1.02)';
+                }});
+                
+                frame.addEventListener('mouseleave', function() {{
+                    this.style.background = 'rgba(0, 255, 0, 0.05)';
+                    this.style.transform = 'scale(1)';
+                }});
+            }});
+            
+            // Auto-scroll animation
+            let scrollSpeed = 0.5;
+            function autoScroll() {{
+                window.scrollBy(0, scrollSpeed);
+                requestAnimationFrame(autoScroll);
+            }}
+            
+            // Start auto-scroll after 3 seconds
+            setTimeout(() => {{
+                autoScroll();
+            }}, 3000);
+        </script>
+    </body>
+    </html>
+    """
+    
+    return make_response(html_content)
+
 @app.errorhandler(404)
 def not_found(error):
     """
