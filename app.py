@@ -125,34 +125,50 @@ def generate_marketing_password():
     
     return password
 
+# Add a module-level flag to track if we've already printed the current code
+_current_code_printed = False
+_next_code_printed = False
+
 def get_current_marketing_password():
     """
     Get the current live marketing password from Google Secret Manager.
     This should only change after successful deployment.
     """
+    global _current_code_printed
+    
     try:
         from scripts.secret_manager_client import SecretManagerClient
         client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
         current_code = client.get_current_marketing_code()
         
         if current_code:
-            print(f"✅ Using Secret Manager current code: {current_code}")
+            if not _current_code_printed:
+                print(f"✅ Using Secret Manager current code: {current_code}")
+                _current_code_printed = True
             return current_code
         else:
-            print("⚠️ No current code found in Secret Manager")
+            if not _current_code_printed:
+                print("⚠️ No current code found in Secret Manager")
+                _current_code_printed = True
             
     except Exception as e:
-        print(f"❌ Error accessing Secret Manager: {e}")
+        if not _current_code_printed:
+            print(f"❌ Error accessing Secret Manager: {e}")
+            _current_code_printed = True
     
     # Fallback to environment variable
     build_password = os.environ.get('BUILD_MARKETING_PASSWORD')
     if build_password:
-        print(f"✅ Using BUILD_MARKETING_PASSWORD: {build_password}")
+        if not _current_code_printed:
+            print(f"✅ Using BUILD_MARKETING_PASSWORD: {build_password}")
+            _current_code_printed = True
         return build_password
     
     # Last resort: generate based on current commit (should not happen in production)
     fallback_code = generate_marketing_password()
-    print(f"⚠️ Using fallback generated code: {fallback_code}")
+    if not _current_code_printed:
+        print(f"⚠️ Using fallback generated code: {fallback_code}")
+        _current_code_printed = True
     return fallback_code
 
 def get_next_marketing_password():
@@ -160,19 +176,27 @@ def get_next_marketing_password():
     Get the next marketing password from Google Secret Manager.
     This is what will become the current code after next deployment.
     """
+    global _next_code_printed
+    
     try:
         from scripts.secret_manager_client import SecretManagerClient
         client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
         next_code = client.get_next_marketing_code()
         
         if next_code:
-            print(f"✅ Using Secret Manager next code: {next_code}")
+            if not _next_code_printed:
+                print(f"✅ Using Secret Manager next code: {next_code}")
+                _next_code_printed = True
             return next_code
         else:
-            print("⚠️ No next code found in Secret Manager")
+            if not _next_code_printed:
+                print("⚠️ No next code found in Secret Manager")
+                _next_code_printed = True
             
     except Exception as e:
-        print(f"❌ Error accessing Secret Manager: {e}")
+        if not _next_code_printed:
+            print(f"❌ Error accessing Secret Manager: {e}")
+            _next_code_printed = True
     
     # Fallback: generate next code based on current commit
     try:
@@ -183,7 +207,9 @@ def get_next_marketing_password():
         next_hash = "next_unknown"
     
     fallback_code = generate_marketing_password_from_hash(next_hash)
-    print(f"⚠️ Using fallback generated next code: {fallback_code}")
+    if not _next_code_printed:
+        print(f"⚠️ Using fallback generated next code: {fallback_code}")
+        _next_code_printed = True
     return fallback_code
 
 def generate_marketing_password_from_hash(commit_hash: str):
