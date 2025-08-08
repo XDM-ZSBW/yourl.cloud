@@ -129,16 +129,28 @@ def get_current_marketing_password():
     """
     try:
         from scripts.secret_manager_client import SecretManagerClient
-        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
-        return client.get_current_marketing_code()
-    except Exception as e:
-        # Fallback to environment variable or generate based on commit
-        build_password = os.environ.get('BUILD_MARKETING_PASSWORD')
-        if build_password:
-            return build_password
+        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
+        current_code = client.get_current_marketing_code()
         
-        # Last resort: generate based on current commit
-        return generate_marketing_password()
+        if current_code:
+            print(f"✅ Using Secret Manager current code: {current_code}")
+            return current_code
+        else:
+            print("⚠️ No current code found in Secret Manager")
+            
+    except Exception as e:
+        print(f"❌ Error accessing Secret Manager: {e}")
+    
+    # Fallback to environment variable
+    build_password = os.environ.get('BUILD_MARKETING_PASSWORD')
+    if build_password:
+        print(f"✅ Using BUILD_MARKETING_PASSWORD: {build_password}")
+        return build_password
+    
+    # Last resort: generate based on current commit (should not happen in production)
+    fallback_code = generate_marketing_password()
+    print(f"⚠️ Using fallback generated code: {fallback_code}")
+    return fallback_code
 
 def get_next_marketing_password():
     """
@@ -147,18 +159,29 @@ def get_next_marketing_password():
     """
     try:
         from scripts.secret_manager_client import SecretManagerClient
-        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'))
-        return client.get_next_marketing_code()
-    except Exception as e:
-        # Fallback: generate next code based on current commit
-        try:
-            commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
-                                                text=True, stderr=subprocess.DEVNULL).strip()[:8]
-            next_hash = commit_hash + "next"
-        except:
-            next_hash = "next_unknown"
+        client = SecretManagerClient(os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'))
+        next_code = client.get_next_marketing_code()
         
-        return generate_marketing_password_from_hash(next_hash)
+        if next_code:
+            print(f"✅ Using Secret Manager next code: {next_code}")
+            return next_code
+        else:
+            print("⚠️ No next code found in Secret Manager")
+            
+    except Exception as e:
+        print(f"❌ Error accessing Secret Manager: {e}")
+    
+    # Fallback: generate next code based on current commit
+    try:
+        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                            text=True, stderr=subprocess.DEVNULL).strip()[:8]
+        next_hash = commit_hash + "next"
+    except:
+        next_hash = "next_unknown"
+    
+    fallback_code = generate_marketing_password_from_hash(next_hash)
+    print(f"⚠️ Using fallback generated next code: {fallback_code}")
+    return fallback_code
 
 def generate_marketing_password_from_hash(commit_hash: str):
     """Generate marketing password from specific commit hash"""

@@ -120,7 +120,7 @@ class DeploymentManager:
                 "--allow-unauthenticated",
                 "--port", "8080",
                 "--min-instances", "1",
-                "--set-env-vars", f"GOOGLE_CLOUD_PROJECT={self.project_id}"
+                "--set-env-vars", f"GOOGLE_CLOUD_PROJECT=yourl-cloud"
             ]
             
             result = subprocess.run(cmd, capture_output=True, text=True)

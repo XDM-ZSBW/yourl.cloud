@@ -44,7 +44,7 @@ steps:
       - '--min-instances'
       - '1'
       - '--set-env-vars'
-      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+      - 'GOOGLE_CLOUD_PROJECT=yourl-cloud'
 
   # Update live experience code after successful deployment
   - name: 'python:3.9'

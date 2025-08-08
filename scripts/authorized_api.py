@@ -124,7 +124,7 @@ class AuthorizedAPI:
 
 # Initialize API
 api = AuthorizedAPI(
-    project_id=os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822'),
+    project_id=os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud'),
     database_connection_string=os.environ.get('DATABASE_CONNECTION_STRING')
 )
 
