@@ -14,7 +14,7 @@ from scripts.marketing_code_manager import MarketingCodeManager
 
 def update_live_code_after_deployment():
     """Update the live experience code after successful deployment"""
-    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822')
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud')
     
     try:
         manager = MarketingCodeManager(project_id)
@@ -42,7 +42,7 @@ def update_live_code_after_deployment():
 
 def show_current_ownership():
     """Show current code ownership information"""
-    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', 'root-wharf-383822')
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', 'yourl-cloud')
     
     try:
         manager = MarketingCodeManager(project_id)
