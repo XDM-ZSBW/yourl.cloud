@@ -132,6 +132,20 @@ class DatabaseClient:
                     )
                 """)
                 
+                # Landing page versions table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS landing_page_versions (
+                        id SERIAL PRIMARY KEY,
+                        visitor_id VARCHAR(100) NOT NULL,
+                        landing_page_url VARCHAR(500) NOT NULL,
+                        build_version VARCHAR(100),
+                        marketing_code VARCHAR(50),
+                        first_accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        last_accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        access_count INTEGER DEFAULT 1
+                    )
+                """)
+                
                 conn.commit()
                 logger.info("Database tables ensured successfully")
                 
@@ -468,6 +482,70 @@ class DatabaseClient:
         except Exception as e:
             logger.error(f"Error getting visitor stats: {e}")
             return {}
+        finally:
+            conn.close()
+    
+    def store_landing_page_version(self, visitor_id: str, landing_page_url: str, 
+                                  build_version: Optional[str] = None, 
+                                  marketing_code: Optional[str] = None) -> bool:
+        """Store or update landing page version for a visitor"""
+        conn = self._get_connection()
+        if not conn:
+            return False
+        
+        try:
+            with conn.cursor() as cursor:
+                # Check if visitor already has a landing page version record
+                cursor.execute("""
+                    SELECT id, access_count FROM landing_page_versions 
+                    WHERE visitor_id = %s
+                """, (visitor_id,))
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # Update existing record
+                    cursor.execute("""
+                        UPDATE landing_page_versions 
+                        SET landing_page_url = %s, build_version = %s, marketing_code = %s,
+                            last_accessed_at = NOW(), access_count = access_count + 1
+                        WHERE visitor_id = %s
+                    """, (landing_page_url, build_version, marketing_code, visitor_id))
+                else:
+                    # Create new record
+                    cursor.execute("""
+                        INSERT INTO landing_page_versions 
+                        (visitor_id, landing_page_url, build_version, marketing_code)
+                        VALUES (%s, %s, %s, %s)
+                    """, (visitor_id, landing_page_url, build_version, marketing_code))
+                
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Error storing landing page version: {e}")
+            conn.rollback()
+            return False
+        finally:
+            conn.close()
+    
+    def get_landing_page_version(self, visitor_id: str) -> Optional[Dict[str, Any]]:
+        """Get the landing page version for a visitor"""
+        conn = self._get_connection()
+        if not conn:
+            return None
+        
+        try:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT * FROM landing_page_versions 
+                    WHERE visitor_id = %s
+                    ORDER BY last_accessed_at DESC
+                    LIMIT 1
+                """, (visitor_id,))
+                result = cursor.fetchone()
+                return dict(result) if result else None
+        except Exception as e:
+            logger.error(f"Error getting landing page version: {e}")
+            return None
         finally:
             conn.close()
 

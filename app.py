@@ -507,45 +507,97 @@ def main_endpoint():
             except Exception as e:
                 print(f"⚠️ Database logging failed: {e}")
             
-            # Create HTML response with clickable links
-            html_content = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Authentication Success - Yourl.Cloud</title>
-                <meta charset="utf-8">
-                <style>
-                    body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; text-align: center; }}
-                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                    h1 {{ color: #28a745; }}
-                    .success-box {{ background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }}
-                    .btn {{ background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px; }}
-                    .code-display {{ background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 5px; margin: 10px 0; font-family: monospace; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>✅ Authentication Successful!</h1>
-                    <div class="success-box">
-                        <p><strong>🎉 Welcome to Yourl.Cloud API!</strong></p>
-                        <p>Marketing password accepted!</p>
-                    </div>
+            # Get current build version/commit hash
+            try:
+                build_version = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+                                                     text=True, stderr=subprocess.DEVNULL).strip()[:8]
+            except:
+                build_version = "unknown"
+            
+            # Get visitor data for personalization
+            visitor_data = get_visitor_data()
+            visitor_id = visitor_data.get('visitor_id', 'unknown')
+            
+            # Store landing page version in SQL if database is available
+            try:
+                database_connection = os.environ.get('DATABASE_CONNECTION_STRING')
+                if database_connection:
+                    from scripts.database_client import DatabaseClient
+                    db_client = DatabaseClient(database_connection)
                     
-                    <h3>📊 Current Status:</h3>
-                    <div class="code-display">
-                        <strong>Current Code:</strong> {current_password}<br>
-                        <strong>Next Code:</strong> {next_password}
-                    </div>
+                    # Store landing page version
+                    landing_page_url = f"{get_original_protocol()}://{get_original_host()}/"
+                    db_client.store_landing_page_version(
+                        visitor_id=visitor_id,
+                        landing_page_url=landing_page_url,
+                        build_version=build_version,
+                        marketing_code=current_password
+                    )
                     
-                    <h3>🔗 Quick Links:</h3>
-                    <a href="/" class="btn">🏠 Back to Landing Page</a>
-                    <a href="/api" class="btn">🔍 View API Endpoint</a>
-                    <a href="/status" class="btn">📊 Check Status</a>
-                </div>
-            </body>
-            </html>
-            """
-            response = make_response(html_content)
+                    # Get visitor's landing page history for personalization
+                    landing_page_version = db_client.get_landing_page_version(visitor_id)
+            except Exception as e:
+                print(f"⚠️ Database logging failed: {e}")
+                landing_page_version = None
+            
+            # Create personalized response based on visitor data
+            is_new_visitor = visitor_data.get('is_new_visitor', True)
+            has_used_code = visitor_data.get('has_used_code', False)
+            total_visits = visitor_data.get('total_visits', 1)
+            
+            # Personalize the experience
+            if is_new_visitor:
+                welcome_message = "🎉 Welcome to Yourl.Cloud! This is your first visit!"
+                experience_level = "new_user"
+            elif has_used_code:
+                welcome_message = f"🎯 Welcome back! This is visit #{total_visits} and you've successfully used a code before!"
+                experience_level = "returning_user"
+            else:
+                welcome_message = f"👋 Welcome back! This is visit #{total_visits}!"
+                experience_level = "returning_visitor"
+            
+            # Create JSON response with actual URL and personalized data
+            json_response = {
+                "status": "authenticated",
+                "message": welcome_message,
+                "experience_level": experience_level,
+                "visitor_data": {
+                    "visitor_id": visitor_id,
+                    "total_visits": total_visits,
+                    "is_new_visitor": is_new_visitor,
+                    "has_used_code": has_used_code,
+                    "tracking_key": visitor_data.get('tracking_key')
+                },
+                "landing_page": {
+                    "url": f"{get_original_protocol()}://{get_original_host()}/",
+                    "build_version": build_version,
+                    "marketing_code": current_password
+                },
+                "current_marketing_password": current_password,
+                "next_marketing_password": next_password,
+                "ownership": {
+                    "perplexity": "current_marketing_password",
+                    "cursor": "next_marketing_password"
+                },
+                "navigation": {
+                    "back_to_landing": f"{get_original_protocol()}://{get_original_host()}/",
+                    "api_endpoint": f"{get_original_protocol()}://{get_original_host()}/api",
+                    "status_page": f"{get_original_protocol()}://{get_original_host()}/status"
+                },
+                "timestamp": datetime.utcnow().isoformat(),
+                "organization": FRIENDS_FAMILY_GUARD["organization"]
+            }
+            
+            # Add landing page version history if available
+            if landing_page_version:
+                json_response["landing_page"]["version_history"] = {
+                    "first_accessed": landing_page_version.get('first_accessed_at'),
+                    "last_accessed": landing_page_version.get('last_accessed_at'),
+                    "access_count": landing_page_version.get('access_count'),
+                    "previous_url": landing_page_version.get('landing_page_url')
+                }
+            
+            response = jsonify(json_response)
             
             # Set visitor cookie if not already set
             if not request.cookies.get('visitor_id'):
